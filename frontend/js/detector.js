@@ -7,7 +7,7 @@
    ========================================================= */
 import { saveHistoryEntry } from "./history.js";
 
-const API_BASE_URL = "http://127.0.0.1:5000";
+const API_BASE_URL = "";
 
 const PREDICT_URL = `${API_BASE_URL}/predict`;
 const IMAGE_PREDICT_URL = `${API_BASE_URL}/predict-image`;
