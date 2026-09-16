@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TruthLens — AI-Powered Misinformation Detection</title>
+  <link rel="stylesheet" href="css/style.css">
+<script src="js/theme.js"></script>
+  <!-- UI-only enhancements: existing routes and functionality are preserved. -->
+  <style>
+    :root{
+      --tl-blue:#2563eb;
+      --tl-purple:#7c3aed;
+      --tl-ink:#111827;
+      --tl-muted:#64748b;
+      --tl-line:rgba(148,163,184,.22);
+      --tl-card:rgba(255,255,255,.78);
+    }
+
+    html{scroll-behavior:smooth}
+    body{overflow-x:hidden}
+
+    .tl-page{
+      position:relative;
+      min-height:100vh;
+      isolation:isolate;
+    }
+
+    .tl-glow{
+      position:absolute;
+      border-radius:50%;
+      filter:blur(8px);
+      pointer-events:none;
+      z-index:-1;
+      opacity:.65;
+    }
+    .tl-glow.one{width:360px;height:360px;top:70px;left:-140px;background:rgba(96,165,250,.25)}
+    .tl-glow.two{width:420px;height:420px;top:320px;right:-180px;background:rgba(167,139,250,.20)}
+
+    .tl-navbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:15px clamp(20px,5vw,72px);
+      background:rgba(255,255,255,.78);
+      border-bottom:1px solid rgba(148,163,184,.16);
+      backdrop-filter:blur(18px);
+      transition:.25s ease;
+    }
+    .tl-navbar.scrolled{
+      box-shadow:0 8px 30px rgba(15,23,42,.08);
+      background:rgba(255,255,255,.92);
+    }
+
+    .tl-brand{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      color:var(--tl-ink);
+      text-decoration:none;
+      font-weight:800;
+      font-size:1.18rem;
+    }
+    .tl-brand-mark{
+      width:35px;height:35px;border-radius:11px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,#dbeafe,#ede9fe);
+      box-shadow:0 6px 18px rgba(37,99,235,.15);
+    }
+
+    .tl-nav-links{display:flex;align-items:center;gap:25px}
+    .tl-nav-links a{
+      color:#334155;text-decoration:none;font-weight:600;font-size:.94rem;
+      transition:.2s ease;
+    }
+    .tl-nav-links a:hover{color:var(--tl-blue)}
+
+    .tl-nav-cta{
+      padding:10px 17px;border-radius:11px!important;color:#fff!important;
+      background:linear-gradient(135deg,var(--tl-blue),var(--tl-purple));
+      box-shadow:0 8px 20px rgba(37,99,235,.22);
+    }
+
+    .tl-admin-link{
+      color:#b45309!important;
+      font-weight:800!important;
+    }
+    .tl-admin-link:hover{color:#92400e!important}
+
+    .tl-admin-warning{
+      position:fixed;inset:0;z-index:1000;display:none;
+      align-items:center;justify-content:center;padding:20px;
+      background:rgba(15,23,42,.55);backdrop-filter:blur(7px);
+    }
+    .tl-admin-warning.open{display:flex}
+    .tl-admin-dialog{
+      width:min(460px,100%);padding:30px;border-radius:24px;
+      background:#fff;border:1px solid rgba(148,163,184,.25);
+      box-shadow:0 30px 80px rgba(15,23,42,.28);
+    }
+    .tl-admin-icon{font-size:2rem;margin-bottom:10px}
+    .tl-admin-dialog h2{margin:0 0 10px;color:#111827}
+    .tl-admin-dialog p{margin:0;color:#64748b;line-height:1.6}
+    .tl-admin-actions{display:flex;gap:10px;margin-top:22px}
+    .tl-admin-actions button,.tl-admin-actions a{
+      flex:1;min-height:44px;border-radius:11px;padding:0 16px;
+      display:inline-flex;align-items:center;justify-content:center;
+      border:1px solid #e2e8f0;font-weight:800;text-decoration:none;cursor:pointer;
+      box-sizing:border-box;
+    }
+    .tl-admin-cancel{background:#f8fafc;color:#334155}
+    .tl-admin-continue{background:#b45309;color:#fff;border-color:#b45309!important}
+    @media(max-width:850px){
+      .tl-admin-link{padding:10px 12px!important}
+    }
+
+    .tl-menu{
+      display:none;border:0;background:transparent;font-size:1.5rem;cursor:pointer;
+    }
+
+    .tl-hero{
+      max-width:1180px;margin:0 auto;
+      min-height:680px;
+      padding:88px 24px 70px;
+      display:grid;grid-template-columns:1.05fr .95fr;gap:65px;
+      align-items:center;
+    }
+
+    .tl-eyebrow{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 13px;border:1px solid rgba(37,99,235,.15);
+      border-radius:999px;background:rgba(239,246,255,.75);
+      color:#1d4ed8;font-size:.82rem;font-weight:800;
+      margin-bottom:22px;
+    }
+    .tl-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 5px rgba(34,197,94,.12)}
+
+    .tl-hero h1{
+      margin:0;max-width:700px;
+      font-size:clamp(3.2rem,6vw,5.8rem);
+      line-height:.98;letter-spacing:-.055em;color:var(--tl-ink);
+    }
+    .tl-gradient-text{
+      background:linear-gradient(100deg,var(--tl-blue),var(--tl-purple));
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+    }
+    .tl-hero-copy{
+      max-width:610px;margin:24px 0 0;
+      color:var(--tl-muted);font-size:1.1rem;line-height:1.75;
+    }
+    .tl-hero-copy strong{color:#334155}
+
+    .tl-actions{display:flex;gap:13px;flex-wrap:wrap;margin-top:32px}
+    .tl-btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      min-height:48px;padding:0 20px;border-radius:13px;
+      text-decoration:none;font-weight:800;transition:.22s ease;
+    }
+    .tl-btn-primary{
+      color:#fff;background:linear-gradient(135deg,var(--tl-blue),var(--tl-purple));
+      box-shadow:0 12px 25px rgba(37,99,235,.23);
+    }
+    .tl-btn-primary:hover{transform:translateY(-3px);box-shadow:0 16px 30px rgba(37,99,235,.3)}
+    .tl-btn-secondary{
+      color:#1e293b;background:rgba(255,255,255,.72);border:1px solid var(--tl-line);
+    }
+    .tl-btn-secondary:hover{transform:translateY(-3px);background:#fff}
+
+    .tl-mini-note{margin-top:17px;color:#94a3b8;font-size:.78rem}
+
+    /* Interactive analysis preview */
+    .tl-preview-wrap{position:relative}
+    .tl-preview{
+      position:relative;padding:20px;border:1px solid rgba(255,255,255,.8);
+      border-radius:25px;background:rgba(255,255,255,.72);
+      box-shadow:0 30px 70px rgba(30,41,59,.13);
+      backdrop-filter:blur(18px);
+      animation:tlFloat 5s ease-in-out infinite;
+    }
+    @keyframes tlFloat{50%{transform:translateY(-8px)}}
+
+    .tl-window-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px}
+    .tl-window-dots{display:flex;gap:6px}
+    .tl-window-dots i{width:7px;height:7px;border-radius:50%;background:#cbd5e1}
+    .tl-live{font-size:.7rem;font-weight:800;color:#16a34a;display:flex;gap:6px;align-items:center}
+    .tl-live span{width:6px;height:6px;background:#22c55e;border-radius:50%}
+
+    .tl-input-card{
+      padding:17px;border-radius:17px;background:#f8fafc;border:1px solid #e2e8f0;
+    }
+    .tl-input-label{font-size:.72rem;color:#94a3b8;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+    .tl-sample{font-size:.95rem;line-height:1.55;color:#334155;margin-top:9px}
+
+    .tl-scan{
+      margin:15px 0;padding:13px 14px;border-radius:14px;
+      background:linear-gradient(90deg,rgba(239,246,255,.9),rgba(245,243,255,.9));
+      color:#475569;font-size:.78rem;font-weight:700;
+    }
+    .tl-bar{height:6px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin-top:9px}
+    .tl-bar span{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--tl-blue),var(--tl-purple));transition:1.5s ease}
+
+    .tl-result{
+      display:flex;align-items:center;justify-content:space-between;gap:15px;
+      padding:15px;border-radius:16px;background:#fff;border:1px solid #e2e8f0;
+    }
+    .tl-result-title{font-weight:900;color:#334155}
+    .tl-result-sub{font-size:.72rem;color:#94a3b8;margin-top:3px}
+    .tl-risk{padding:8px 11px;border-radius:10px;background:#fef3c7;color:#b45309;font-size:.72rem;font-weight:900;white-space:nowrap}
+
+    .tl-preview-badge{
+      position:absolute;right:-22px;bottom:30px;padding:12px 14px;border-radius:14px;
+      background:#fff;box-shadow:0 15px 35px rgba(15,23,42,.12);
+      font-size:.75rem;font-weight:800;color:#334155;
+    }
+
+    .tl-section{max-width:1180px;margin:0 auto;padding:92px 24px}
+    .tl-section-head{text-align:center;max-width:700px;margin:0 auto 40px}
+    .tl-kicker{font-size:.75rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--tl-blue)}
+    .tl-section h2{font-size:clamp(2rem,4vw,3rem);letter-spacing:-.04em;margin:9px 0 12px;color:var(--tl-ink)}
+    .tl-section-head p{color:var(--tl-muted);line-height:1.7}
+
+    .tl-check-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .tl-check-card{
+      position:relative;padding:28px;border:1px solid var(--tl-line);border-radius:21px;
+      background:var(--tl-card);backdrop-filter:blur(12px);overflow:hidden;
+      transition:.25s ease;
+    }
+    .tl-check-card:after{
+      content:"";position:absolute;inset:auto -35px -55px auto;width:120px;height:120px;border-radius:50%;
+      background:rgba(96,165,250,.09);
+    }
+    .tl-check-card:hover{transform:translateY(-7px);box-shadow:0 20px 45px rgba(15,23,42,.09);border-color:rgba(37,99,235,.25)}
+    .tl-icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:1.35rem;background:#eff6ff;margin-bottom:19px}
+    .tl-check-card:nth-child(2) .tl-icon{background:#f5f3ff}
+    .tl-check-card:nth-child(3) .tl-icon{background:#ecfdf5}
+    .tl-check-card h3{margin:0;color:#1e293b}
+    .tl-check-card p{color:var(--tl-muted);line-height:1.65;font-size:.92rem}
+    .tl-card-link{color:var(--tl-blue);font-weight:800;text-decoration:none;font-size:.85rem}
+
+    .tl-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .tl-step{padding:28px;border-radius:21px;background:#fff;border:1px solid var(--tl-line)}
+    .tl-step-number{font-size:2.1rem;font-weight:900;color:#dbeafe}
+    .tl-step h3{margin:8px 0;color:#1e293b}.tl-step p{color:var(--tl-muted);line-height:1.65}
+
+    .tl-why{
+      border-radius:30px;padding:60px 35px;text-align:center;
+      background:linear-gradient(135deg,#eff6ff 0%,#f5f3ff 55%,#f8fafc 100%);
+      border:1px solid rgba(148,163,184,.2);
+    }
+    .tl-why h2{margin-bottom:30px}
+    .tl-quotes{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+    .tl-quote{
+      padding:13px 17px;border-radius:999px;background:rgba(255,255,255,.72);
+      border:1px solid rgba(148,163,184,.16);color:#475569;font-weight:750;font-size:.88rem;
+      transition:.2s ease;
+    }
+    .tl-quote:hover{transform:translateY(-3px);background:#fff}
+
+    .tl-cta{
+      text-align:center;padding:70px 25px 95px;
+    }
+    .tl-cta-box{
+      max-width:850px;margin:auto;padding:55px 25px;border-radius:30px;
+      background:#111827;color:#fff;box-shadow:0 25px 60px rgba(15,23,42,.16);
+    }
+    .tl-cta-box h2{color:#fff;margin-top:8px}
+    .tl-cta-box p{color:#cbd5e1;max-width:570px;margin:0 auto;line-height:1.7}
+    .tl-cta-box .tl-btn-primary{margin-top:25px;background:#fff;color:#1d4ed8;box-shadow:none}
+
+    .tl-footer{
+      border-top:1px solid var(--tl-line);padding:25px 24px;
+      display:flex;justify-content:space-between;gap:15px;align-items:center;
+      max-width:1180px;margin:auto;color:#94a3b8;font-size:.82rem;
+    }
+
+    .tl-reveal{opacity:0;transform:translateY(20px);transition:opacity .65s ease,transform .65s ease}
+    .tl-reveal.visible{opacity:1;transform:none}
+
+    @media(max-width:850px){
+      .tl-menu{display:block}
+      .tl-nav-links{
+        display:none;position:absolute;top:67px;left:15px;right:15px;
+        flex-direction:column;align-items:stretch;padding:14px;border-radius:17px;
+        background:rgba(255,255,255,.96);box-shadow:0 20px 40px rgba(15,23,42,.12);
+      }
+      .tl-nav-links.open{display:flex}
+      .tl-nav-links a{padding:10px 12px}
+      .tl-hero{grid-template-columns:1fr;padding-top:65px;min-height:auto;gap:45px}
+      .tl-hero h1{font-size:clamp(3rem,13vw,4.5rem)}
+      .tl-check-grid,.tl-steps{grid-template-columns:1fr}
+      .tl-preview-badge{right:5px}
+      .tl-footer{flex-direction:column;text-align:center}
+    }
+
+    @media(prefers-reduced-motion:reduce){
+      html{scroll-behavior:auto}
+      *,*:before,*:after{animation:none!important;transition:none!important}
+      .tl-reveal{opacity:1;transform:none}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="tl-admin-warning" id="adminWarning" role="dialog" aria-modal="true" aria-labelledby="adminWarningTitle">
+    <div class="tl-admin-dialog">
+      <div class="tl-admin-icon">🛡️</div>
+      <h2 id="adminWarningTitle">Admin access only</h2>
+      <p>Warning: only authorized administrators are allowed to log in here. If you are not an admin, please cancel and return to the main site.</p>
+      <div class="tl-admin-actions">
+        <button type="button" class="tl-admin-cancel" id="adminCancelBtn">Cancel</button>
+        <a href="admin-login.html" class="tl-admin-continue" id="adminContinueBtn">Continue to Admin Login</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="tl-page">
+    <div class="tl-glow one"></div>
+    <div class="tl-glow two"></div>
+
+    <header class="tl-navbar" id="tlNavbar">
+      <a href="index.html" class="tl-brand" aria-label="TruthLens Home">
+        <span class="tl-brand-mark">🔎</span>
+        <span>TruthLens</span>
+      </a>
+
+      <button class="tl-menu" id="tlMenu" aria-label="Open menu" aria-expanded="false">☰</button>
+
+      <nav class="tl-nav-links" id="tlNavLinks">
+        <a href="#home">Home</a>
+        <a href="#how-it-works">How It Works</a>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">
+    🌙
+</button>
+        <a href="#features">Features</a>
+        <a href="#why">Why TruthLens?</a>
+        <a href="login.html">Login</a>
+        <a href="admin-login.html" id="adminLoginLink" class="tl-admin-link">🛡️ Admin Login</a>
+        <a href="register.html" class="tl-nav-cta">Get Started</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="tl-hero" id="home">
+        <div class="tl-reveal">
+          <div class="tl-eyebrow"><span class="tl-dot"></span> AI-powered content verification</div>
+          <h1>Before you <span class="tl-gradient-text">believe it,</span> verify it.</h1>
+          <p class="tl-hero-copy">
+            <strong>Got something sus?</strong> Don't just scroll past it. TruthLens helps you
+            analyze news text, links, and images using machine-learning based signals.
+          </p>
+
+          <div class="tl-actions">
+            <a href="register.html" class="tl-btn tl-btn-primary">🔎 Start Verifying</a>
+            <a href="#how-it-works" class="tl-btn tl-btn-secondary">See how it works ↓</a>
+          </div>
+          <div class="tl-mini-note">Text • URL • Image &nbsp;|&nbsp; Fast analysis &nbsp;|&nbsp; Built for smarter sharing</div>
+        </div>
+
+        <div class="tl-preview-wrap tl-reveal">
+          <div class="tl-preview">
+            <div class="tl-window-top">
+              <div class="tl-window-dots"><i></i><i></i><i></i></div>
+              <div class="tl-live"><span></span> Demo analysis</div>
+            </div>
+
+            <div class="tl-input-card">
+              <div class="tl-input-label">Sample news</div>
+              <div class="tl-sample">“Breaking: Free laptops announced for every college student!”</div>
+            </div>
+
+            <div class="tl-scan">
+              <div id="tlScanText">Scanning content...</div>
+              <div class="tl-bar"><span id="tlBar"></span></div>
+            </div>
+
+            <div class="tl-result">
+              <div>
+                <div class="tl-result-title">⚠️ Potentially misleading</div>
+                <div class="tl-result-sub">Model confidence: 89%</div>
+                 <div class="tl-preview-badge">✨ Think twice. Verify first.</div>
+              </div>
+              <div class="tl-risk">HIGH RISK</div>
+            </div>
+           
+          </div>
+          
+        </div>
+      </section>
+
+      <section class="tl-section" id="features">
+        <div class="tl-section-head tl-reveal">
+          <div class="tl-kicker">Verify anything</div>
+          <h2>One place for the stuff that makes you go “hmm…”</h2>
+          <p>Choose what you want to check and use TruthLens before you trust or share it.</p>
+        </div>
+
+        <div class="tl-check-grid">
+          <article class="tl-check-card tl-reveal">
+            <div class="tl-icon">📝</div>
+            <h3>Text Verification</h3>
+            <p>Paste a headline or article and analyze patterns associated with misinformation.</p>
+            <a href="register.html" class="tl-card-link">Check text →</a>
+          </article>
+
+          <article class="tl-check-card tl-reveal">
+            <div class="tl-icon">🔗</div>
+            <h3>URL Verification</h3>
+            <p>Have a suspicious link? Submit it through the existing detector workflow.</p>
+            <a href="register.html" class="tl-card-link">Check a link →</a>
+          </article>
+
+          <article class="tl-check-card tl-reveal">
+            <div class="tl-icon">🖼️</div>
+            <h3>Image Verification</h3>
+            <p>Upload a screenshot of an article and let the existing image analysis workflow process it.</p>
+            <a href="register.html" class="tl-card-link">Check an image →</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="tl-section" id="how-it-works">
+        <div class="tl-section-head tl-reveal">
+          <div class="tl-kicker">Simple workflow</div>
+          <h2>Three steps. Less guessing.</h2>
+          <p>No complicated setup. Submit the content, let the model analyze it, then review the result.</p>
+        </div>
+
+        <div class="tl-steps">
+          <article class="tl-step tl-reveal">
+            <div class="tl-step-number">01</div>
+            <h3>Submit</h3>
+            <p>Drop in text, a news link, or an article screenshot.</p>
+          </article>
+          <article class="tl-step tl-reveal">
+            <div class="tl-step-number">02</div>
+            <h3>Analyze</h3>
+            <p>TruthLens processes the submitted content using the project's existing ML workflow.</p>
+          </article>
+          <article class="tl-step tl-reveal">
+            <div class="tl-step-number">03</div>
+            <h3>Understand</h3>
+            <p>Review the prediction and confidence information before deciding what to do next.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="tl-section" id="why">
+        <div class="tl-why tl-reveal">
+          <div class="tl-kicker">Why TruthLens?</div>
+          <h2>Because viral doesn't automatically mean true.</h2>
+          <div class="tl-quotes">
+            <span class="tl-quote">🧠 Headlines can manipulate attention.</span>
+            <span class="tl-quote">📸 Screenshots can lose context.</span>
+            <span class="tl-quote">🕒 Old news can look new.</span>
+            <span class="tl-quote">🔗 A link isn't proof by itself.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="tl-cta">
+        <div class="tl-cta-box tl-reveal">
+          <div class="tl-kicker">Your turn</div>
+          <h2>Got something suspicious?</h2>
+          <p>Don't guess. Check it with TruthLens and make a more informed decision before you share.</p>
+          <a href="register.html" class="tl-btn tl-btn-primary">🔎 Verify Now</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="tl-footer">
+      <span>© TruthLens · AI-powered misinformation detection</span>
+      <span>Machine-learning predictions are not guaranteed to establish factual truth.</span>
+    </footer>
+  </div>
+
+  <script>
+    // UI-only interactions. No backend/API/auth logic is changed.
+    (() => {
+      const navbar = document.getElementById("tlNavbar");
+      const menu = document.getElementById("tlMenu");
+      const nav = document.getElementById("tlNavLinks");
+      const bar = document.getElementById("tlBar");
+      const scanText = document.getElementById("tlScanText");
+
+      window.addEventListener("scroll", () => {
+        navbar.classList.toggle("scrolled", window.scrollY > 8);
+      }, {passive:true});
+
+      menu.addEventListener("click", () => {
+        const open = nav.classList.toggle("open");
+        menu.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+
+      const adminLink = document.getElementById("adminLoginLink");
+      const adminWarning = document.getElementById("adminWarning");
+      const adminCancelBtn = document.getElementById("adminCancelBtn");
+      const adminContinueBtn = document.getElementById("adminContinueBtn");
+
+      nav.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", (event) => {
+          if (link === adminLink) {
+            event.preventDefault();
+            nav.classList.remove("open");
+            adminWarning.classList.add("open");
+            adminCancelBtn.focus();
+          } else {
+            nav.classList.remove("open");
+          }
+        });
+      });
+
+      adminCancelBtn.addEventListener("click", () => {
+        adminWarning.classList.remove("open");
+      });
+
+      adminWarning.addEventListener("click", (event) => {
+        if (event.target === adminWarning) adminWarning.classList.remove("open");
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") adminWarning.classList.remove("open");
+      });
+
+      adminContinueBtn.addEventListener("click", () => {
+        adminWarning.classList.remove("open");
+      });
+
+      const messages = [
+        "Scanning content...",
+        "Checking language signals...",
+        "Analyzing patterns...",
+        "Preparing result..."
+      ];
+      let index = 0;
+      setInterval(() => {
+        index = (index + 1) % messages.length;
+        scanText.textContent = messages[index];
+      }, 1800);
+
+      setTimeout(() => { bar.style.width = "89%"; }, 350);
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {threshold:.12});
+
+      document.querySelectorAll(".tl-reveal").forEach(el => observer.observe(el));
+    })();
+  </script>
+</body>
+</html>

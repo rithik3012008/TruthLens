@@ -1,0 +1,9 @@
+flask
+flask-cors
+scikit-learn
+joblib
+pytesseract
+Pillow
+numpy
+requests
+beautifulsoup4

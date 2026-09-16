@@ -1,0 +1,18 @@
+# Environment variables / secrets
+.env
+backend/.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# Node (if ever added)
+node_modules/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Large dataset files (optional - remove these lines if you DO want the dataset in Git)
+dataset/*.csv

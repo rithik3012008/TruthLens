@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login — TruthLens</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/theme.js"></script>
+  <style>
+    .admin-badge{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:5px 11px;border-radius:999px;
+      background:rgba(37,99,235,.1);color:var(--accent);
+      font-size:.74rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase;
+      margin-bottom:16px;
+    }
+    .admin-lock-icon{
+      width:52px;height:52px;border-radius:16px;
+      display:grid;place-items:center;font-size:1.4rem;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      margin-bottom:18px;
+    }
+    .admin-note{
+      margin-top:22px;padding:12px 14px;border-radius:12px;
+      background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.25);
+      color:#92600a;font-size:.76rem;line-height:1.55;
+    }
+    html[data-theme="dark"] .admin-note{color:#fbbf24;background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.25)}
+  </style>
+</head>
+<body>
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+  <div class="bg-blob blob-3"></div>
+
+  <nav class="navbar">
+    <a href="index.html" class="logo">🔎 TruthLens</a>
+    <div class="nav-links">
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">🌙</button>
+    </div>
+  </nav>
+
+  <main class="auth-page">
+    <div class="auth-card">
+      <div class="admin-badge">🔐 Restricted Access</div>
+      <div class="admin-lock-icon">🛡️</div>
+      <h2>Admin Portal</h2>
+      <p class="auth-subtitle">Sign in with an authorized admin account to manage TruthLens.</p>
+
+      <form id="adminLoginForm">
+        <label for="email">Email address</label>
+        <input type="email" id="email" placeholder="admin@example.com" autocomplete="email" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required>
+
+        <button type="submit" class="btn-primary btn-full">Login to Admin Panel →</button>
+        <p id="formMessage" class="form-message"></p>
+      </form>
+
+      <p class="auth-footer-text"><a href="login.html">← Back to regular login</a></p>
+
+      <div class="admin-note">
+        This portal is for authorized administrators only. Regular TruthLens accounts
+        cannot access this area, even with valid credentials.
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="js/firebase-config.js"></script>
+  <script type="module" src="js/admin-auth.js"></script>
+</body>
+</html>

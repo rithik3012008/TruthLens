@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Users — TruthLens Admin</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/theme.js"></script>
+  <style>
+    .admin-tag{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:4px 10px;border-radius:999px;
+      background:rgba(37,92,235,.1);color:var(--accent);
+      font-size:.72rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase;
+    }
+    .users-toolbar{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+      margin:22px 0 16px;
+    }
+    .users-search{
+      flex:1;min-width:220px;max-width:360px;
+      padding:11px 14px;border-radius:12px;border:1px solid var(--line);
+      font:inherit;background:#fff;
+    }
+    html[data-theme="dark"] .users-search{background:#0f172a;color:#e5e7eb;border-color:#263244}
+    #userCountLabel{font-size:.85rem;color:var(--muted);font-weight:650}
+
+    .admin-card{
+      padding:0;overflow:hidden;
+      border:1px solid rgba(226,232,240,.92);border-radius:20px;
+      background:rgba(255,255,255,.9);box-shadow:var(--shadow-soft);
+    }
+    html[data-theme="dark"] .admin-card{background:rgba(17,24,39,.92);border-color:#263244}
+
+    table.users-table{width:100%;border-collapse:collapse;font-size:.88rem}
+    table.users-table th{
+      text-align:left;padding:14px 16px;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;
+      color:var(--muted);border-bottom:1px solid var(--line);white-space:nowrap;
+    }
+    table.users-table td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+    table.users-table tr:last-child td{border-bottom:none}
+    .u-name{font-weight:700}
+    .u-email{font-size:.78rem;color:var(--muted);margin-top:2px}
+
+    .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:750;background:#f1f2f6;color:#4b5563}
+    .pill-admin{background:rgba(37,99,235,.1);color:var(--accent)}
+    .pill-active{background:rgba(22,163,74,.1);color:var(--success)}
+    .pill-disabled{background:rgba(220,38,38,.1);color:var(--danger)}
+
+    .actions-cell{white-space:nowrap}
+    .btn-mini{
+      border:1px solid var(--line);background:#fff;color:#111827;
+      font-size:.76rem;font-weight:700;padding:6px 10px;border-radius:9px;cursor:pointer;margin-right:6px;
+    }
+    html[data-theme="dark"] .btn-mini{background:#0f172a;color:#e5e7eb;border-color:#263244}
+    .btn-mini:hover{transform:translateY(-1px)}
+    .btn-mini:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .btn-mini-danger{color:var(--danger);border-color:rgba(220,38,38,.35)}
+
+    #usersEmptyState, #usersLoadingMessage{padding:30px;text-align:center;color:var(--muted)}
+
+    /* Detail slide-over */
+    #userDetailBackdrop{
+      position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:40;
+    }
+    #userDetailPanel{
+      position:fixed;top:0;right:0;height:100vh;width:min(420px,100%);
+      background:#fff;z-index:50;box-shadow:-20px 0 60px rgba(15,23,42,.2);
+      padding:26px;overflow-y:auto;
+    }
+    html[data-theme="dark"] #userDetailPanel{background:#0f172a;color:#e5e7eb}
+    #userDetailClose{
+      position:absolute;top:18px;right:18px;border:none;background:none;
+      font-size:1.2rem;cursor:pointer;color:var(--muted);
+    }
+    .detail-email{color:var(--muted);margin:2px 0 14px;font-size:.88rem}
+    .detail-pills{display:flex;gap:8px;margin-bottom:18px}
+    .detail-meta{display:grid;gap:8px;margin-bottom:20px;font-size:.84rem}
+    .detail-meta div{display:flex;justify-content:space-between;gap:10px}
+    .detail-meta span{color:var(--muted)}
+    .detail-meta code{font-size:.74rem;background:#f1f2f6;padding:2px 6px;border-radius:6px}
+    html[data-theme="dark"] .detail-meta code{background:#1e293b}
+    .detail-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+    .detail-stats div{text-align:center;padding:12px 6px;border:1px solid var(--line);border-radius:12px}
+    .detail-stats strong{display:block;font-size:1.3rem}
+    .detail-stats span{font-size:.72rem;color:var(--muted)}
+    .detail-recent-row{padding:12px 0;border-bottom:1px solid var(--line)}
+    .detail-recent-row:last-child{border-bottom:none}
+    .detail-recent-row p{margin:0 0 6px;font-size:.85rem;overflow-wrap:anywhere}
+    .detail-recent-meta{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted)}
+    .text-fake{color:var(--danger);font-weight:700}
+    .text-real{color:var(--success);font-weight:700}
+    .detail-loading,.detail-empty{color:var(--muted);font-size:.85rem}
+  </style>
+</head>
+<body data-admin-protected="true">
+
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+  <div class="bg-blob blob-3"></div>
+
+  <nav class="navbar">
+    <a href="admin-dashboard.html" class="logo">🔎 TruthLens Admin</a>
+    <div class="nav-links">
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">🌙</button>
+      <a href="admin-dashboard.html">Dashboard</a>
+      <a href="admin-users.html"><strong>Users</strong></a>
+      <a href="#" id="adminLogoutBtn">Logout</a>
+    </div>
+  </nav>
+
+  <main class="dashboard">
+    <div class="admin-tag">🛡️ Admin</div>
+    <div class="dashboard-header">
+      <h1>Manage Users</h1>
+      <p class="dashboard-subtitle">Search, review, and manage every TruthLens account.</p>
+    </div>
+
+    <div class="users-toolbar">
+      <input type="text" id="userSearch" class="users-search" placeholder="Search by name or email...">
+      <span id="userCountLabel"></span>
+    </div>
+
+    <section class="admin-card">
+      <p id="usersLoadingMessage" class="hidden"></p>
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Joined</th>
+            <th>Last login</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="usersTableBody"></tbody>
+      </table>
+      <p id="usersEmptyState" class="hidden">No users found.</p>
+    </section>
+  </main>
+
+  <div id="userDetailBackdrop" class="hidden"></div>
+  <aside id="userDetailPanel" class="hidden">
+    <button id="userDetailClose" aria-label="Close">✕</button>
+    <div id="userDetailBody"></div>
+  </aside>
+
+  <script type="module" src="js/firebase-config.js"></script>
+  <script type="module" src="js/admin-auth.js"></script>
+  <script type="module" src="js/admin-users.js"></script>
+</body>
+</html>
