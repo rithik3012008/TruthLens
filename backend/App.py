@@ -24,10 +24,17 @@ from urllib.parse import urlparse, quote_plus
 app = Flask(__name__)
 CORS(app)
 
-# Change this path if Tesseract is installed somewhere else
-pytesseract.pytesseract.tesseract_cmd = (
-    r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-)
+# Tesseract path
+import shutil
+
+tesseract_path = shutil.which("tesseract")
+
+if tesseract_path:
+    pytesseract.pytesseract.tesseract_cmd = tesseract_path
+elif os.path.exists(r"C:\Program Files\Tesseract-OCR\tesseract.exe"):
+    pytesseract.pytesseract.tesseract_cmd = (
+        r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    )
 
 
 # ============================================================
