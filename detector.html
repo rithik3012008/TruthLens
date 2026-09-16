@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verification Center — TruthLens</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root{
+      --tl-ink:#172033;
+      --tl-muted:#6b7280;
+      --tl-line:#e8ebf1;
+      --tl-surface:rgba(255,255,255,.88);
+      --tl-shadow:0 24px 70px rgba(31,41,55,.10);
+      --tl-radius:24px;
+    }
+    *{box-sizing:border-box}
+    body{background:#f7f8fc;color:var(--tl-ink)}
+    .tl-detector-wrap{max-width:1180px;margin:0 auto;padding:54px 22px 70px;position:relative;z-index:2}
+    .tl-detector-hero{display:flex;justify-content:space-between;gap:30px;align-items:flex-end;margin-bottom:28px}
+    .tl-kicker{display:inline-flex;align-items:center;gap:8px;font-size:.75rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#667085;margin-bottom:12px}
+    .tl-kicker span{width:8px;height:8px;border-radius:50%;background:#111827;display:inline-block}
+    .tl-detector-hero h1{font-size:clamp(2rem,4vw,3.25rem);line-height:1.04;margin:0 0 12px;letter-spacing:-.045em}
+    .tl-detector-hero p{max-width:680px;margin:0;color:var(--tl-muted);font-size:1rem;line-height:1.7}
+    .tl-hero-badge{padding:11px 15px;border:1px solid var(--tl-line);border-radius:999px;background:#fff;font-size:.78rem;font-weight:800;white-space:nowrap;box-shadow:0 8px 24px rgba(31,41,55,.06)}
+    .tl-mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+    .tl-mode{padding:18px 19px;border:1px solid var(--tl-line);border-radius:18px;background:rgba(255,255,255,.72);display:flex;gap:13px;align-items:flex-start}
+    .tl-mode.active{border-color:#cfd5df;background:#fff;box-shadow:0 10px 28px rgba(31,41,55,.06)}
+    .tl-mode-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:#f1f3f7;font-size:1.1rem;flex:none}
+    .tl-mode strong{display:block;font-size:.9rem;margin-bottom:4px}
+    .tl-mode small{display:block;color:var(--tl-muted);font-size:.76rem;line-height:1.45}
+    .tl-workspace{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(270px,.7fr);gap:20px;align-items:start}
+    .tl-panel{background:var(--tl-surface);border:1px solid rgba(226,230,237,.9);border-radius:var(--tl-radius);box-shadow:var(--tl-shadow);backdrop-filter:blur(14px)}
+    .tl-main-panel{padding:28px}
+    .tl-panel-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;margin-bottom:18px}
+    .tl-panel-head h2{font-size:1.15rem;margin:0 0 5px;letter-spacing:-.02em}
+    .tl-panel-head p{margin:0;color:var(--tl-muted);font-size:.82rem;line-height:1.5}
+    .tl-status{font-size:.7rem;font-weight:800;padding:7px 10px;border-radius:999px;background:#f1f3f7;white-space:nowrap}
+    #articleInput{width:100%;min-height:300px;resize:vertical;border:1px solid #dfe3ea;border-radius:18px;background:#fff;padding:18px 19px;color:var(--tl-ink);font:inherit;font-size:.94rem;line-height:1.7;outline:none;transition:.2s;box-shadow:inset 0 1px 2px rgba(0,0,0,.02)}
+    #articleInput:focus{border-color:#aeb6c4;box-shadow:0 0 0 4px rgba(17,24,39,.06)}
+    #articleInput::placeholder{color:#9aa1ad}
+    .tl-input-meta{display:flex;justify-content:space-between;gap:12px;margin:10px 2px 16px;color:#8a919d;font-size:.72rem}
+    #checkBtn{min-height:52px;border-radius:15px;font-weight:800;letter-spacing:-.01em}
+    .tl-divider{display:flex;align-items:center;gap:12px;margin:24px 0;color:#a0a6b1;font-size:.72rem;font-weight:800;letter-spacing:.08em}
+    .tl-divider:before,.tl-divider:after{content:"";height:1px;background:var(--tl-line);flex:1}
+    .tl-image-box{border:1.5px dashed #cfd4dd;border-radius:18px;background:#fafbfc;padding:20px;display:grid;grid-template-columns:auto 1fr auto;gap:15px;align-items:center}
+    .tl-upload-icon{width:46px;height:46px;border-radius:14px;background:#fff;border:1px solid var(--tl-line);display:grid;place-items:center;font-size:1.2rem}
+    .tl-image-box strong{display:block;font-size:.86rem;margin-bottom:4px}
+    .tl-image-box p{margin:0;color:var(--tl-muted);font-size:.75rem;line-height:1.45}
+    .tl-upload-label{display:inline-flex;align-items:center;justify-content:center;padding:10px 13px;border-radius:11px;border:1px solid #dfe3ea;background:#fff;font-size:.74rem;font-weight:800;cursor:pointer;white-space:nowrap}
+    #imageInput{display:block;width:100%;margin-top:9px;font-size:.74rem;color:#7a818c}
+    #checkImageBtn{margin-top:12px!important;min-height:48px;border-radius:14px}
+    .tl-side{display:grid;gap:16px}
+    .tl-side-card{padding:22px}
+    .tl-side-card h3{font-size:.95rem;margin:0 0 14px;letter-spacing:-.015em}
+    .tl-step{display:flex;gap:11px;margin:13px 0}
+    .tl-step:last-child{margin-bottom:0}
+    .tl-step-num{width:26px;height:26px;border-radius:9px;background:#f0f2f5;display:grid;place-items:center;font-size:.7rem;font-weight:900;flex:none}
+    .tl-step div:last-child{font-size:.77rem;color:var(--tl-muted);line-height:1.5}
+    .tl-step strong{display:block;color:var(--tl-ink);font-size:.78rem;margin-bottom:2px}
+    .tl-tip{padding:17px;border-radius:16px;background:#f6f7f9;border:1px solid var(--tl-line);font-size:.76rem;color:#596170;line-height:1.55}
+    .tl-result-wrap{margin-top:20px}
+    #resultBox{border-radius:18px;overflow:hidden}
+    .tl-result-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:13px}
+    .tl-result-title strong{font-size:.9rem}
+    .tl-result-title span{font-size:.7rem;color:#7b828e;font-weight:700}
+    .tl-disclaimer{margin-top:20px;padding:14px 16px;border:1px solid #eadfbd;border-radius:14px;background:#fffaf0;color:#715d24;font-size:.75rem;line-height:1.55}
+    @media(max-width:850px){.tl-workspace{grid-template-columns:1fr}.tl-detector-hero{align-items:flex-start;flex-direction:column}.tl-hero-badge{white-space:normal}.tl-mode-grid{grid-template-columns:1fr}}
+    @media(max-width:560px){.tl-detector-wrap{padding:35px 14px 50px}.tl-main-panel{padding:18px}.tl-side-card{padding:18px}.tl-image-box{grid-template-columns:auto 1fr}.tl-upload-label{grid-column:1/-1;width:100%}.tl-detector-hero h1{font-size:2rem}#articleInput{min-height:240px}}
+    .tl-mode{
+      appearance:none;
+      -webkit-appearance:none;
+      width:100%;
+      text-align:left;
+      font:inherit;
+      color:inherit;
+      cursor:pointer;
+    }
+    .tl-mode:focus-visible{
+      outline:3px solid rgba(37,99,235,.25);
+      outline-offset:2px;
+    }
+    .tl-mode:not(.active):hover{
+      border-color:#b9c2d0;
+      transform:translateY(-1px);
+    }
+    .tl-mode-panel.hidden{display:none!important}
+
+
+    /* TruthLens result details */
+    .tl-result-details{display:grid;gap:14px;margin-top:18px}
+    .tl-result-card{padding:16px;border:1px solid var(--tl-line);border-radius:14px;background:#fafbfc}
+    .tl-result-card h3{margin:0 0 8px;font-size:.82rem}
+    .tl-result-card p{margin:5px 0;color:var(--tl-muted);font-size:.78rem;line-height:1.5}
+    .tl-score-row{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:.8rem;font-weight:800}
+    .tl-score-track{height:8px;border-radius:999px;background:#e9edf3;overflow:hidden;margin-top:8px}
+    .tl-score-fill{height:100%;width:0;border-radius:999px;transition:width .25s ease}
+    .evidence-item{padding:12px 0;border-bottom:1px solid var(--tl-line)}
+    .evidence-item:last-child{border-bottom:0}
+    .evidence-item strong{font-size:.8rem}
+    .evidence-item p{margin:5px 0}
+    .evidence-item a,.tl-result-card a{font-size:.75rem;font-weight:700}
+    .contributing-word{display:inline-block;margin:4px 5px 0 0;padding:5px 8px;border-radius:999px;background:#eef2f7;font-size:.7rem}
+    .live-verification-status{font-weight:800;font-size:.8rem}
+    html[data-theme="dark"] .tl-result-card{background:#111827;border-color:#263244}
+    html[data-theme="dark"] .tl-score-track{background:#263244}
+    html[data-theme="dark"] .contributing-word{background:#1f2937;color:#e5e7eb}
+
+    /* =========================================================
+       TRUTHLENS UI POLISH — visual only
+       ========================================================= */
+    .tl-theme-toggle{
+      border:1px solid var(--tl-line);
+      background:#fff;
+      color:#172033;
+      width:38px;height:38px;border-radius:12px;
+      display:grid;place-items:center;
+      cursor:pointer;font-size:1rem;
+      transition:transform .2s ease,background .2s ease,border-color .2s ease;
+    }
+    .tl-theme-toggle:hover{transform:translateY(-1px);background:#f5f6f8}
+    .tl-result-wrap{
+      margin-top:22px;
+      border:1px solid var(--tl-line);
+      background:linear-gradient(180deg,#fff 0%,#fafbfe 100%);
+      padding:20px;
+    }
+    .tl-result-title{
+      padding-bottom:14px;
+      border-bottom:1px solid var(--tl-line);
+    }
+    .tl-result-title strong{font-size:1rem}
+    .tl-verdict-shell{
+      margin:18px 0;
+      padding:24px;
+      border:1px solid var(--tl-line);
+      border-radius:18px;
+      background:#fff;
+      text-align:center;
+      box-shadow:0 12px 35px rgba(31,41,55,.07);
+    }
+    .tl-verdict-kicker{
+      font-size:.68rem;font-weight:900;letter-spacing:.12em;
+      text-transform:uppercase;color:#8a919d;margin-bottom:8px;
+    }
+    .tl-verdict-value{
+      font-size:clamp(2rem,5vw,3.1rem);
+      line-height:1;font-weight:950;letter-spacing:-.05em;
+    }
+    .tl-verdict-subtitle{
+      margin-top:9px;color:var(--tl-muted);font-size:.8rem;
+    }
+    .tl-metric-grid{
+      display:grid;grid-template-columns:1fr 1fr;gap:14px;
+    }
+    .tl-metric-card{
+      padding:17px;border:1px solid var(--tl-line);
+      border-radius:16px;background:#fff;
+    }
+    .tl-metric-head{
+      display:flex;justify-content:space-between;gap:10px;
+      align-items:center;font-size:.78rem;font-weight:800;
+    }
+    .tl-metric-value{font-size:1.05rem;font-weight:900}
+    .tl-risk-pill{
+      display:inline-flex;align-items:center;gap:6px;
+      margin-top:9px;padding:6px 9px;border-radius:999px;
+      background:#f4f5f7;color:#596170;font-size:.68rem;font-weight:900;
+    }
+    .tl-section-label{
+      display:flex;align-items:center;gap:8px;
+      margin:4px 0 10px;font-size:.76rem;font-weight:900;
+      letter-spacing:.02em;
+    }
+    .tl-section-label::before{
+      content:"";width:5px;height:18px;border-radius:99px;background:#111827;
+    }
+    .tl-empty{
+      color:#8a919d;font-size:.78rem;line-height:1.5;
+    }
+    .tl-live-badge{
+      display:inline-flex;padding:5px 8px;border-radius:999px;
+      background:#eef2f7;font-size:.65rem;font-weight:900;
+      margin-bottom:8px;
+    }
+    .tl-evidence-count{
+      color:#7b828e;font-size:.7rem;margin:3px 0 12px;
+    }
+    .tl-evidence-item{
+      padding:13px 0;
+      border-bottom:1px solid var(--tl-line);
+    }
+    .tl-evidence-item:last-child{border-bottom:0}
+    .tl-evidence-item strong{display:block;font-size:.8rem;line-height:1.4}
+    .tl-evidence-meta{color:#8a919d;font-size:.68rem;margin:5px 0 8px}
+    .tl-evidence-link{
+      display:inline-flex;align-items:center;gap:5px;
+      font-size:.7rem;font-weight:900;text-decoration:none;
+    }
+    .tl-word-list{display:flex;flex-wrap:wrap;gap:6px}
+    .tl-word-list .contributing-word{margin:0}
+    .tl-image-box{transition:border-color .2s ease,background .2s ease}
+    .tl-image-box:hover{border-color:#aeb6c4;background:#f7f8fa}
+    #loading{
+      padding:12px 14px;border-radius:12px;
+      background:#f1f3f7;color:#374151;
+    }
+    #errorMessage{
+      padding:11px 13px;border-radius:12px;
+      background:#fff1f0;border:1px solid #f3c5c1;
+    }
+
+    /* Dark mode */
+    html[data-theme="dark"]{
+      --tl-ink:#f3f4f6;
+      --tl-muted:#9ca3af;
+      --tl-line:#263244;
+      --tl-surface:rgba(17,24,39,.9);
+      --tl-shadow:0 24px 70px rgba(0,0,0,.28);
+    }
+    html[data-theme="dark"] body{background:#090d14;color:var(--tl-ink)}
+    html[data-theme="dark"] .navbar{background:rgba(9,13,20,.88);border-color:#1f2937}
+    html[data-theme="dark"] .tl-theme-toggle{
+      background:#111827;color:#f9fafb;border-color:#263244;
+    }
+    html[data-theme="dark"] .tl-theme-toggle:hover{background:#182235}
+    html[data-theme="dark"] .tl-hero-badge,
+    html[data-theme="dark"] .tl-mode,
+    html[data-theme="dark"] .tl-panel,
+    html[data-theme="dark"] .tl-mode.active,
+    html[data-theme="dark"] .tl-verdict-shell,
+    html[data-theme="dark"] .tl-metric-card{
+      background:#111827;border-color:#263244;
+    }
+    html[data-theme="dark"] .tl-mode:not(.active):hover{border-color:#3b4a60}
+    html[data-theme="dark"] .tl-mode-icon,
+    html[data-theme="dark"] .tl-status,
+    html[data-theme="dark"] .tl-step-num,
+    html[data-theme="dark"] .tl-tip,
+    html[data-theme="dark"] .tl-image-box,
+    html[data-theme="dark"] #loading{
+      background:#151e2d;border-color:#263244;color:#d1d5db;
+    }
+    html[data-theme="dark"] #articleInput{
+      background:#0f1724;color:#f3f4f6;border-color:#2c3a4f;
+    }
+    html[data-theme="dark"] #articleInput:focus{
+      border-color:#53657f;box-shadow:0 0 0 4px rgba(96,125,162,.16);
+    }
+    html[data-theme="dark"] #articleInput::placeholder{color:#687386}
+    html[data-theme="dark"] .tl-result-wrap{
+      background:linear-gradient(180deg,#0f1724 0%,#0b111b 100%);
+    }
+    html[data-theme="dark"] .tl-result-card{
+      background:#111827;border-color:#263244;
+    }
+    html[data-theme="dark"] .tl-score-track{background:#263244}
+    html[data-theme="dark"] .tl-disclaimer{
+      background:#211d12;border-color:#4b4024;color:#d8c98c;
+    }
+    html[data-theme="dark"] #errorMessage{
+      background:#2a1515;border-color:#5a2929;color:#fca5a5;
+    }
+    html[data-theme="dark"] .tl-section-label::before{background:#f3f4f6}
+    html[data-theme="dark"] .tl-live-badge{background:#1f2937;color:#d1d5db}
+    html[data-theme="dark"] .tl-kicker span{background:#f3f4f6}
+
+    @media(max-width:650px){
+      .tl-metric-grid{grid-template-columns:1fr}
+      .tl-result-wrap{padding:15px}
+      .tl-verdict-shell{padding:20px}
+    }
+
+  </style>
+</head>
+<body data-protected="true">
+
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+  <div class="bg-blob blob-3"></div>
+
+  <nav class="navbar">
+    <a href="dashboard.html" class="logo">🔎 TruthLens</a>
+    <div class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="history.html">History</a>
+      <button type="button" id="themeToggle" class="tl-theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+      <a href="#" id="logoutBtn">Logout</a>
+    </div>
+  </nav>
+
+  <main class="tl-detector-wrap">
+    <section class="tl-detector-hero">
+      <div>
+        <div class="tl-kicker"><span></span> AI-powered verification workspace</div>
+        <h1>TruthLens Verification Center</h1>
+        <p>Drop in a news headline, article, link, or screenshot. TruthLens analyzes the available content and gives you a machine-learning prediction.</p>
+      </div>
+      <div class="tl-hero-badge">⚡ Fast • Simple • ML-powered</div>
+    </section>
+
+    <section class="tl-mode-grid" aria-label="Verification options">
+      <button type="button" class="tl-mode active" id="textModeBtn" data-mode="text">
+        <div class="tl-mode-icon">✍️</div>
+        <div><strong>Text verification</strong><small>Paste a headline or full article for analysis.</small></div>
+      </button>
+
+      <button type="button" class="tl-mode" id="urlModeBtn" data-mode="url">
+        <div class="tl-mode-icon">🔗</div>
+        <div><strong>URL verification</strong><small>Paste a news article link and inspect it.</small></div>
+      </button>
+
+      <button type="button" class="tl-mode" id="imageModeBtn" data-mode="image">
+        <div class="tl-mode-icon">📷</div>
+        <div><strong>Image verification</strong><small>Upload a screenshot containing article text.</small></div>
+      </button>
+    </section>
+
+    <section class="tl-workspace">
+      <div>
+        <div class="tl-panel tl-main-panel">
+          <div class="tl-panel-head">
+            <div>
+              <h2>Analyze news content</h2>
+              <p id="modeDescription">Paste a headline or article text for ML analysis.</p>
+            </div>
+            <div class="tl-status">MODEL CHECK</div>
+          </div>
+
+          <div id="textModePanel" class="tl-mode-panel">
+            <textarea id="articleInput" placeholder="Paste a news headline or full article..." rows="10"></textarea>
+            <div class="tl-input-meta">
+              <span id="inputTip">Tip: more context can give the classifier more text to work with.</span>
+              <span>Secure input</span>
+            </div>
+
+            <button id="checkBtn" class="btn-primary btn-full">🔍 Analyze Text</button>
+          </div>
+
+          <div id="imageModePanel" class="tl-mode-panel hidden">
+            <div class="tl-image-box">
+              <div class="tl-upload-icon">📷</div>
+              <div>
+                <strong>Upload an article screenshot</strong>
+                <p>Crop to just the headline and article text — avoid browser tabs, the address bar, and ads, which can confuse the OCR reading.</p>
+              </div>
+              <label for="imageInput" class="tl-upload-label">Choose image</label>
+            </div>
+            <input type="file" id="imageInput" accept="image/*">
+            <div class="tl-input-meta">
+              <span>Tip: a tight crop of just the article gives the OCR cleaner text to work with.</span>
+              <span>Secure input</span>
+            </div>
+            <button id="checkImageBtn" class="btn-secondary btn-full">📸 Check Screenshot</button>
+          </div>
+
+          <div id="resultBox" class="result-box hidden tl-result-wrap">
+            <div class="tl-result-title">
+              <strong>Verification result</strong>
+              <span>Model check</span>
+            </div>
+
+            <div class="tl-verdict-shell">
+              <div class="tl-verdict-kicker">TruthLens verdict</div>
+              <div class="result-label tl-verdict-value" id="resultLabel"></div>
+              <div class="tl-verdict-subtitle">The model reads the writing style, then an evidence check compares the story against current news coverage.</div>
+            </div>
+
+            <div class="tl-metric-grid">
+              <div class="tl-metric-card">
+                <div class="tl-metric-head">
+                  <span>Model confidence</span>
+                  <strong id="confidence">0.0%</strong>
+                </div>
+                <div class="tl-score-track">
+                  <div id="confidenceBar" class="tl-score-fill"></div>
+                </div>
+                <div id="confidenceValue" style="margin-top:7px;color:#8a919d;font-size:.68rem;"></div>
+              </div>
+
+              <div class="tl-metric-card">
+                <div class="tl-metric-head">
+                  <span>Misinformation risk</span>
+                  <strong id="riskScore">0/100</strong>
+                </div>
+                <div class="tl-score-track">
+                  <div id="riskScoreBar" class="tl-score-fill"></div>
+                </div>
+                <div class="tl-risk-pill">● <span id="riskLevel">Medium Risk</span></div>
+              </div>
+            </div>
+
+            <div class="tl-result-details">
+              <div id="extractedTextPreview" class="tl-result-card extracted-text-preview hidden"></div>
+
+              <div id="sourceInfo" class="tl-result-card hidden"></div>
+
+              <div id="liveVerification" class="tl-result-card hidden"></div>
+
+              <div id="evidenceContainer" class="tl-result-card hidden">
+                <h3>Matching news coverage</h3>
+              </div>
+
+              <div id="contributingWords" class="tl-result-card hidden"></div>
+            </div>
+          </div>
+
+          <div id="loading" style="display:none;margin-top:14px;font-size:.8rem;font-weight:700;"></div>
+          <div id="errorMessage" style="display:none;margin-top:14px;color:#b42318;font-size:.8rem;font-weight:700;"></div>
+
+          <div class="tl-disclaimer">
+            ⚠️ <strong>Important:</strong> TruthLens combines a machine-learning prediction with a search for matching news coverage. Neither check verifies facts directly, so the result is a guide rather than proof that an article is true or false.
+          </div>
+        </div>
+      </div>
+
+      <aside class="tl-side">
+        <div class="tl-panel tl-side-card">
+          <h3>How to use it</h3>
+          <div class="tl-step"><div class="tl-step-num">1</div><div><strong>Add content</strong>Paste text, a supported link, or choose a screenshot.</div></div>
+          <div class="tl-step"><div class="tl-step-num">2</div><div><strong>Run analysis</strong>Let the existing TruthLens model process your input.</div></div>
+          <div class="tl-step"><div class="tl-step-num">3</div><div><strong>Read the result</strong>Review the verdict, the model confidence, and the reasons behind the score.</div></div>
+        </div>
+
+        <div class="tl-panel tl-side-card">
+          <h3>For better results</h3>
+          <div class="tl-tip">Include the headline plus as much relevant article text as you have. For screenshots, use a sharp image where the text is clearly visible.</div>
+        </div>
+
+        <div class="tl-panel tl-side-card">
+          <h3>Stay in control</h3>
+          <div class="tl-tip">The verdict combines two separate checks: what the model learned from its training data, and whether current news coverage backs the story up. Every adjustment to the score is listed in the result.</div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    // ============================================================
+    // TRUTHLENS DEDICATED VERIFICATION MODES
+    // Text | URL | Image
+    // ============================================================
+    document.addEventListener("DOMContentLoaded", () => {
+      const modeButtons = document.querySelectorAll(".tl-mode[data-mode]");
+      const textPanel = document.getElementById("textModePanel");
+      const imagePanel = document.getElementById("imageModePanel");
+      const articleInput = document.getElementById("articleInput");
+      const checkBtn = document.getElementById("checkBtn");
+      const modeDescription = document.getElementById("modeDescription");
+      const inputTip = document.getElementById("inputTip");
+
+      let currentMode = "text";
+
+      function setMode(mode) {
+        currentMode = mode;
+
+        modeButtons.forEach((button) => {
+          button.classList.toggle("active", button.dataset.mode === mode);
+        });
+
+        textPanel.classList.toggle("hidden", mode === "image");
+        imagePanel.classList.toggle("hidden", mode !== "image");
+
+        if (mode === "text") {
+          articleInput.placeholder = "Paste a news headline or full article...";
+          checkBtn.textContent = "🔍 Analyze Text";
+          modeDescription.textContent = "Paste a headline or article text for ML analysis.";
+          inputTip.textContent = "Tip: more context can give the classifier more text to work with.";
+        }
+
+        if (mode === "url") {
+          articleInput.placeholder = "https://example.com/news/article";
+          checkBtn.textContent = "🔗 Analyze URL";
+          modeDescription.textContent = "Paste a news article URL. TruthLens will inspect the available page content.";
+          inputTip.textContent = "Use a complete URL beginning with http:// or https://.";
+        }
+
+        if (mode === "image") {
+          modeDescription.textContent = "Upload a screenshot and TruthLens will extract its text with OCR.";
+        }
+      }
+
+      modeButtons.forEach((button) => {
+        button.addEventListener("click", () => setMode(button.dataset.mode));
+      });
+
+      // Expose the selected mode for detector.js.
+      window.truthLensVerificationMode = () => currentMode;
+
+      setMode("text");
+    });
+  </script>
+
+
+  <script>
+    // TruthLens dark mode — UI only, no detector logic changed.
+    (() => {
+      const root = document.documentElement;
+      const button = document.getElementById("themeToggle");
+      const saved = localStorage.getItem("truthLensTheme");
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+      function applyTheme(theme) {
+        root.setAttribute("data-theme", theme);
+        if (button) {
+          button.textContent = theme === "dark" ? "☀️" : "🌙";
+          button.setAttribute("aria-label", theme === "dark" ? "Switch to light mode" : "Switch to dark mode");
+          button.title = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+        }
+      }
+
+      applyTheme(saved || (prefersDark ? "dark" : "light"));
+
+      if (button) {
+        button.addEventListener("click", () => {
+          const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+          localStorage.setItem("truthLensTheme", next);
+          applyTheme(next);
+        });
+      }
+    })();
+  </script>
+
+  <script type="module" src="js/firebase-config.js"></script>
+  <script type="module" src="js/auth.js"></script>
+  <script type="module" src="js/detector.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — TruthLens</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/theme.js"></script>
+  <style>
+    /* =========================================================
+       TruthLens Dashboard — Dashboard-only UI
+       This CSS changes presentation only. Existing JS/ML IDs
+       and script connections are intentionally preserved.
+       ========================================================= */
+    :root{
+      --tl-ink:#172033;
+      --tl-muted:#667085;
+      --tl-soft:#f7f9fc;
+      --tl-border:#e7ebf2;
+      --tl-primary:#5b5ce2;
+      --tl-primary-dark:#4446c7;
+      --tl-purple:#7c3aed;
+      --tl-green:#16835b;
+      --tl-red:#d64b4b;
+      --tl-shadow:0 18px 55px rgba(25,35,65,.09);
+    }
+
+    body{background:linear-gradient(135deg,#f8faff 0%,#f7f8fc 48%,#fff 100%);color:var(--tl-ink)}
+    .dashboard{max-width:1180px;margin:0 auto;padding:52px 24px 72px;position:relative;z-index:1}
+
+    .dashboard-header{
+      position:relative;overflow:hidden;margin-bottom:26px;padding:34px 36px;
+      border:1px solid rgba(91,92,226,.13);border-radius:26px;
+      background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(246,246,255,.96));
+      box-shadow:var(--tl-shadow)
+    }
+    .dashboard-header:after{content:"";position:absolute;width:210px;height:210px;right:-70px;top:-105px;border-radius:50%;background:rgba(91,92,226,.10)}
+    .dashboard-header h1{position:relative;z-index:1;margin:0 0 8px;font-size:clamp(2rem,4vw,3rem);letter-spacing:-.04em}
+    .dashboard-subtitle{position:relative;z-index:1;margin:0;color:var(--tl-muted);font-size:1rem}
+    .hero-actions{position:relative;z-index:2;margin-top:22px;display:flex;gap:12px;flex-wrap:wrap}
+    .hero-actions a{text-decoration:none}
+
+    .quick-title{margin:30px 0 14px;font-size:1.05rem;font-weight:800;letter-spacing:-.01em}
+    .quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:26px}
+    .quick-card{display:flex;align-items:center;gap:15px;padding:20px;border:1px solid var(--tl-border);border-radius:20px;background:#fff;box-shadow:0 10px 30px rgba(25,35,65,.055);text-decoration:none;color:inherit;transition:.22s ease}
+    .quick-card:hover{transform:translateY(-4px);border-color:rgba(91,92,226,.3);box-shadow:0 16px 36px rgba(25,35,65,.10)}
+    .quick-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:15px;background:#f0f1ff;font-size:1.35rem;flex:0 0 auto}
+    .quick-card strong{display:block;font-size:.98rem;margin-bottom:4px}.quick-card span{font-size:.8rem;color:var(--tl-muted);line-height:1.4}
+
+    .dashboard-grid{display:grid;grid-template-columns:1fr 1.25fr;gap:18px;align-items:stretch}
+    .dashboard-card{border:1px solid var(--tl-border)!important;border-radius:22px!important;background:rgba(255,255,255,.97)!important;box-shadow:0 12px 34px rgba(25,35,65,.06)!important;padding:24px!important}
+    .profile-card{grid-column:1}.action-card{grid-column:2}
+    .profile-card h3,.action-card h3,.stats-card h3,.recent-activity-card h3{margin-top:0;color:var(--tl-ink);font-size:1.05rem}
+    .profile-card p{margin:13px 0;color:var(--tl-muted);font-size:.91rem}.profile-card strong{color:var(--tl-ink)}
+    .badge-verified{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;background:#eaf9f2;color:var(--tl-green);font-size:.76rem;font-weight:800}
+    .action-card{display:flex;flex-direction:column;justify-content:center}.action-card p{color:var(--tl-muted);line-height:1.55;margin:0 0 18px;max-width:600px}
+
+    .stats-card{grid-column:1/-1}.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .stat-item{padding:19px 16px;border:1px solid var(--tl-border);border-radius:17px;background:var(--tl-soft);text-align:center}
+    .stat-number{font-size:2rem;font-weight:850;letter-spacing:-.04em;color:var(--tl-ink)}
+    .stat-label{margin-top:5px;color:var(--tl-muted);font-size:.78rem;font-weight:650}.stat-fake{color:var(--tl-red)}.stat-real{color:var(--tl-green)}
+
+    .recent-activity-card{margin-top:20px!important}.recent-activity-card>h3{display:flex;justify-content:space-between;align-items:center}
+    .activity-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+    .history-link{font-size:.8rem;font-weight:750;color:var(--tl-primary);text-decoration:none}.history-link:hover{text-decoration:underline}
+    #recentActivityList{display:grid;gap:10px}
+    #recentActivityList>div{border:1px solid var(--tl-border);border-radius:15px;padding:14px 16px;background:#fbfcfe}
+    #noActivityMessage{padding:22px;border-radius:15px;background:#f8f9fc;color:var(--tl-muted)!important;text-align:center}
+    #noActivityMessage a{color:var(--tl-primary);font-weight:750}
+
+    .trust-strip{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-top:20px}
+    .trust-card,.steps-card{border:1px solid var(--tl-border);border-radius:22px;background:#fff;padding:23px;box-shadow:0 12px 34px rgba(25,35,65,.055)}
+    .trust-card{background:linear-gradient(135deg,#f5f5ff,#fff)}
+    .trust-card h3,.steps-card h3{margin:0 0 8px;font-size:1rem}.trust-card p{margin:0;color:var(--tl-muted);font-size:.86rem;line-height:1.55}
+    .steps{display:grid;gap:9px}.step{display:flex;gap:10px;align-items:center;color:var(--tl-muted);font-size:.8rem}.step b{display:grid;place-items:center;width:25px;height:25px;border-radius:50%;background:#f0f1ff;color:var(--tl-primary);font-size:.7rem}
+
+    @media(max-width:800px){
+      .dashboard{padding:30px 16px 50px}.dashboard-header{padding:27px 23px;border-radius:21px}
+      .quick-grid,.dashboard-grid,.trust-strip{grid-template-columns:1fr}.quick-card,.profile-card,.action-card,.stats-card{grid-column:auto}
+    }
+    @media(max-width:520px){.stats-grid{grid-template-columns:1fr}.dashboard-card{padding:19px!important}.dashboard-header h1{font-size:2rem}.hero-actions a{width:100%;text-align:center}.quick-grid{gap:11px}}
+  </style>
+</head>
+<body data-protected="true">
+
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+  <div class="bg-blob blob-3"></div>
+
+  <nav class="navbar">
+    <a href="dashboard.html" class="logo">🔎 TruthLens</a>
+    <div class="nav-links">
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">
+    🌙
+</button>
+      <a href="history.html">History</a>
+      <a href="#" id="logoutBtn">Logout</a>
+    </div>
+  </nav>
+
+  <main class="dashboard">
+    <section class="dashboard-header">
+      <h1 id="welcomeMessage">Welcome!</h1>
+      <p class="dashboard-subtitle">Your misinformation-checking command center. Verify before you trust or share.</p>
+      <div class="hero-actions">
+        <a href="detector.html" class="btn-primary">🔎 Verify Something</a>
+        <a href="history.html" class="btn-secondary">View History →</a>
+      </div>
+    </section>
+
+    <div class="quick-title">Quick verification</div>
+    <section class="quick-grid">
+      <a class="quick-card" href="detector.html">
+        <div class="quick-icon">📝</div><div><strong>Check Text</strong><span>Analyze a headline or article</span></div>
+      </a>
+      <a class="quick-card" href="detector.html">
+        <div class="quick-icon">🔗</div><div><strong>Analyze URL</strong><span>Paste a news link to inspect</span></div>
+      </a>
+      <a class="quick-card" href="detector.html">
+        <div class="quick-icon">🖼️</div><div><strong>Check Image</strong><span>Verify a screenshot or article image</span></div>
+      </a>
+    </section>
+
+    <div class="dashboard-grid">
+      <div class="dashboard-card profile-card">
+        <h3>👤 Your Profile</h3>
+        <p><strong>Name:</strong> <span id="profileName">—</span></p>
+        <p><strong>Email:</strong> <span id="profileEmail">—</span></p>
+        <p><strong>Status:</strong> <span class="badge-verified">Verified ✓</span></p>
+      </div>
+
+      <div class="dashboard-card action-card">
+        <h3>🚀 Ready to verify?</h3>
+        <p>Submit a headline, article, link, or screenshot and let your existing TruthLens ML system generate its prediction.</p>
+        <a href="detector.html" class="btn-primary btn-full">Open Detector</a>
+      </div>
+
+      <div class="dashboard-card stats-card">
+        <h3>📊 Your Verification Stats</h3>
+        <div class="stats-grid">
+          <div class="stat-item"><div class="stat-number" id="statTotal">—</div><div class="stat-label">Total Checks</div></div>
+          <div class="stat-item"><div class="stat-number stat-fake" id="statFake">—</div><div class="stat-label">Flagged Fake</div></div>
+          <div class="stat-item"><div class="stat-number stat-real" id="statReal">—</div><div class="stat-label">Flagged Real</div></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="dashboard-card recent-activity-card">
+      <div class="activity-heading">
+        <h3>🕒 Recent Activity</h3>
+        <a href="history.html" class="history-link">Full history →</a>
+      </div>
+      <div id="recentActivityList"></div>
+      <p id="noActivityMessage" class="hidden">No checks yet. <a href="detector.html">Try the detector</a> to get started.</p>
+    </section>
+
+    <section class="trust-strip">
+      <div class="trust-card">
+        <h3>🛡️ Verify before you amplify</h3>
+        <p>TruthLens gives a machine-learning prediction based on learned patterns. Use the result as a signal, then check the original source, date, and context before sharing.</p>
+      </div>
+      <div class="steps-card">
+        <h3>How TruthLens works</h3>
+        <div class="steps">
+          <div class="step"><b>01</b> Submit content</div>
+          <div class="step"><b>02</b> ML analyzes patterns</div>
+          <div class="step"><b>03</b> Review the prediction</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="js/firebase-config.js"></script>
+  <script type="module" src="js/auth.js"></script>
+  <script type="module" src="js/dashboard-stats.js"></script>
+
+</body>
+</html>

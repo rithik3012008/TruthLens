@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — TruthLens</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/theme.js"></script>
+  <style>
+    .admin-topbar{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:8px;flex-wrap:wrap;gap:10px;
+    }
+    .admin-tag{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:4px 10px;border-radius:999px;
+      background:rgba(37,99,235,.1);color:var(--accent);
+      font-size:.72rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase;
+    }
+    .admin-stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:22px}
+    @media(max-width:900px){.admin-stats-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:560px){.admin-stats-grid{grid-template-columns:1fr 1fr}}
+
+    .stat-fake{color:var(--danger)}
+    .stat-real{color:var(--success)}
+    .stat-reports{color:var(--warning)}
+
+    .admin-card{
+      margin-top:22px;padding:24px;
+      border:1px solid rgba(226,232,240,.92);border-radius:20px;
+      background:rgba(255,255,255,.84);box-shadow:var(--shadow-soft);
+      backdrop-filter:blur(14px);
+    }
+    html[data-theme="dark"] .admin-card{background:rgba(17,24,39,.88);border-color:#263244}
+    .admin-card h3{margin:0 0 16px;font-size:1rem}
+
+    #recentActivityList{display:grid;gap:10px}
+    .admin-activity-row{
+      display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+      padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.6);
+    }
+    html[data-theme="dark"] .admin-activity-row{background:rgba(15,23,42,.5);border-color:#263244}
+    .admin-activity-main{min-width:0;flex:1}
+    .admin-activity-who{font-size:.76rem;font-weight:750;color:var(--muted);text-transform:uppercase;letter-spacing:.02em}
+    .admin-activity-text{margin:5px 0 0;font-size:.9rem;overflow-wrap:anywhere}
+    .admin-activity-result{text-align:right;flex:0 0 auto}
+    .admin-activity-badge{font-weight:800;font-size:.82rem;padding:4px 10px;border-radius:999px;display:inline-block}
+    .admin-activity-badge.is-fake{color:var(--danger);background:rgba(220,38,38,.08)}
+    .admin-activity-badge.is-real{color:var(--success);background:rgba(22,163,74,.08)}
+    .admin-activity-date{font-size:.75rem;color:var(--muted);margin-top:4px}
+
+    #noActivityMessage{padding:22px;text-align:center;color:var(--muted)}
+  </style>
+</head>
+<body data-admin-protected="true">
+
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+  <div class="bg-blob blob-3"></div>
+
+  <nav class="navbar">
+    <a href="admin-dashboard.html" class="logo">🔎 TruthLens Admin</a>
+    <div class="nav-links">
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">🌙</button>
+      <a href="admin-users.html">Users</a>
+      <a href="#" id="adminLogoutBtn">Logout</a>
+    </div>
+  </nav>
+
+  <main class="dashboard">
+    <div class="admin-topbar">
+      <div>
+        <div class="admin-tag">🛡️ Admin</div>
+        <div class="dashboard-header">
+          <h1 id="adminWelcome">Welcome, Admin</h1>
+          <p class="dashboard-subtitle">Signed in as <strong id="adminEmail">—</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <p id="adminDashboardMessage" class="form-message hidden"></p>
+
+    <div class="admin-stats-grid">
+      <div class="stat-item"><div class="stat-number" id="adminStatUsers">—</div><div class="stat-label">Total Users</div></div>
+      <div class="stat-item"><div class="stat-number" id="adminStatChecks">—</div><div class="stat-label">Total Checks</div></div>
+      <div class="stat-item"><div class="stat-number stat-real" id="adminStatReal">—</div><div class="stat-label">Flagged Real</div></div>
+      <div class="stat-item"><div class="stat-number stat-fake" id="adminStatFake">—</div><div class="stat-label">Flagged Fake</div></div>
+      <div class="stat-item"><div class="stat-number stat-reports" id="adminStatReports">—</div><div class="stat-label">Total Reports</div></div>
+    </div>
+
+    <section class="admin-card">
+      <h3>🕒 Recent Activity (all users)</h3>
+      <div id="recentActivityList"></div>
+      <p id="noActivityMessage" class="hidden">No checks have been run yet.</p>
+    </section>
+  </main>
+
+  <script type="module" src="js/firebase-config.js"></script>
+  <script type="module" src="js/admin-auth.js"></script>
+  <script type="module" src="js/admin-dashboard-stats.js"></script>
+</body>
+</html>
