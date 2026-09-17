@@ -685,3 +685,50 @@ html[data-theme="dark"] .badge-verified {
   background: #12351f;
   color: #86efac;
 }
+/* =========================================
+ /* =========================================
+   TRUTHLENS CARDS - SIDE BY SIDE
+   ========================================= */
+
+#resultBox {
+    width: 100%;
+}
+
+#resultBox > .tl-explanation-card {
+    width: calc(33.333% - 14px);
+    display: inline-flex;
+    vertical-align: top;
+    margin-right: 16px;
+    box-sizing: border-box;
+    flex-direction: column;
+}
+
+#resultBox > .tl-explanation-card:last-child {
+    margin-right: 0;
+}
+
+
+/* Make the three cards sit in one row */
+#resultBox {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+#resultBox > .tl-result-title {
+    width: 100%;
+}
+
+#resultBox > .tl-explanation-card {
+    flex: 1 1 0;
+    width: auto;
+    margin-right: 0;
+}
+
+
+/* Mobile */
+@media (max-width: 800px) {
+    #resultBox > .tl-explanation-card {
+        flex: 1 1 100%;
+    }
+}

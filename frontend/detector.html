@@ -354,12 +354,7 @@
             <button id="checkImageBtn" class="btn-secondary btn-full">📸 Check Screenshot</button>
           </div>
 
-          <div id="resultBox" class="result-box hidden tl-result-wrap">
-            <div class="tl-result-title">
-              <strong>Verification result</strong>
-              <span>Model check</span>
-            </div>
-
+          
             <div class="tl-verdict-shell">
               <div class="tl-verdict-kicker">TruthLens verdict</div>
               <div class="result-label tl-verdict-value" id="resultLabel"></div>
@@ -400,7 +395,66 @@
               <div id="evidenceContainer" class="tl-result-card hidden">
                 <h3>Matching news coverage</h3>
               </div>
+<div id="resultBox" class="result-box hidden tl-result-wrap"> 
 
+    <div class="tl-result-title"> 
+        <strong>Verification result</strong> 
+        <span>Model check</span> 
+    </div>
+
+
+    <!-- Why this result -->
+    <div class="tl-explanation-card">
+        <div class="tl-card-header">
+            <span class="tl-card-icon">🧠</span>
+            <div>
+                <h3>Why this result?</h3>
+                <p>How TruthLens reached this conclusion</p>
+            </div>
+        </div>
+
+        <div id="whyResult" class="tl-card-content">
+            <p>Analysis details will appear here after verification.</p>
+        </div>
+    </div>
+
+
+    <!-- Potential red flags -->
+    <div class="tl-explanation-card tl-redflag-card">
+        <div class="tl-card-header">
+            <span class="tl-card-icon">🚩</span>
+            <div>
+                <h3>Potential red flags</h3>
+                <p>Signals that may deserve closer checking</p>
+            </div>
+        </div>
+
+        <div id="redFlags" class="tl-card-content">
+            <p>No red flags detected yet.</p>
+        </div>
+    </div>
+
+
+    <!-- What should I check? -->
+    <div class="tl-explanation-card">
+        <div class="tl-card-header">
+            <span class="tl-card-icon">💡</span>
+            <div>
+                <h3>What should I check?</h3>
+                <p>Quick steps to verify the information yourself</p>
+            </div>
+        </div>
+
+        <div id="checkTips" class="tl-card-content">
+            <ul>
+                <li>Check whether reliable news sources report the same claim.</li>
+                <li>Look at the original source and publication date.</li>
+                <li>Be careful with sensational headlines and unsupported claims.</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
               <div id="contributingWords" class="tl-result-card hidden"></div>
             </div>
           </div>
