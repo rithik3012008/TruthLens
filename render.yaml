@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: truth-lens
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile

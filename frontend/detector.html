@@ -13,46 +13,92 @@
       --tl-surface:rgba(255,255,255,.88);
       --tl-shadow:0 24px 70px rgba(31,41,55,.10);
       --tl-radius:24px;
+      --tl-accent:#2f5bea;
+      --tl-accent-soft:#eef2ff;
+      --tl-text-accent:#4338ca;
+      --tl-mode-text:#0369a1;
+      --tl-mode-text-soft:#e0f2fe;
+      --tl-mode-url:#7c3aed;
+      --tl-mode-url-soft:#f1e9fe;
+      --tl-mode-image:#0f9d6f;
+      --tl-mode-image-soft:#e3f9ef;
+      --tl-focus:0 0 0 4px rgba(47,91,234,.18);
     }
     *{box-sizing:border-box}
     body{background:#f7f8fc;color:var(--tl-ink)}
+    ::selection{background:var(--tl-accent-soft);color:var(--tl-text-accent)}
     .tl-detector-wrap{max-width:1180px;margin:0 auto;padding:54px 22px 70px;position:relative;z-index:2}
-    .tl-detector-hero{display:flex;justify-content:space-between;gap:30px;align-items:flex-end;margin-bottom:28px}
-    .tl-kicker{display:inline-flex;align-items:center;gap:8px;font-size:.75rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#667085;margin-bottom:12px}
-    .tl-kicker span{width:8px;height:8px;border-radius:50%;background:#111827;display:inline-block}
-    .tl-detector-hero h1{font-size:clamp(2rem,4vw,3.25rem);line-height:1.04;margin:0 0 12px;letter-spacing:-.045em}
+    .tl-detector-hero{display:flex;justify-content:space-between;gap:30px;align-items:flex-end;margin-bottom:32px;animation:tlFadeUp .5s ease both}
+    .tl-kicker{display:inline-flex;align-items:center;gap:8px;font-size:.75rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--tl-text-accent);margin-bottom:12px}
+    .tl-kicker span{width:8px;height:8px;border-radius:50%;background:var(--tl-accent);display:inline-block;box-shadow:0 0 0 4px var(--tl-accent-soft);animation:tlPulseDot 2.4s ease-in-out infinite}
+    .tl-detector-hero h1{font-size:clamp(2rem,4vw,3.25rem);line-height:1.04;margin:0 0 12px;letter-spacing:-.045em;background:linear-gradient(100deg,var(--tl-ink) 55%,var(--tl-text-accent) 120%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
     .tl-detector-hero p{max-width:680px;margin:0;color:var(--tl-muted);font-size:1rem;line-height:1.7}
-    .tl-hero-badge{padding:11px 15px;border:1px solid var(--tl-line);border-radius:999px;background:#fff;font-size:.78rem;font-weight:800;white-space:nowrap;box-shadow:0 8px 24px rgba(31,41,55,.06)}
-    .tl-mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
-    .tl-mode{padding:18px 19px;border:1px solid var(--tl-line);border-radius:18px;background:rgba(255,255,255,.72);display:flex;gap:13px;align-items:flex-start}
-    .tl-mode.active{border-color:#cfd5df;background:#fff;box-shadow:0 10px 28px rgba(31,41,55,.06)}
-    .tl-mode-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:#f1f3f7;font-size:1.1rem;flex:none}
+    .tl-hero-badge{padding:11px 15px;border:1px solid var(--tl-line);border-radius:999px;background:#fff;font-size:.78rem;font-weight:800;white-space:nowrap;box-shadow:0 8px 24px rgba(31,41,55,.06);transition:transform .2s ease,box-shadow .2s ease}
+    .tl-hero-badge:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(31,41,55,.09)}
+    .tl-mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;animation:tlFadeUp .5s ease .05s both}
+    .tl-mode{padding:18px 19px;border:1px solid var(--tl-line);border-radius:18px;background:rgba(255,255,255,.72);display:flex;gap:13px;align-items:flex-start;position:relative;transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease}
+    .tl-mode.active{border-color:transparent;background:#fff;box-shadow:0 12px 30px rgba(31,41,55,.08),0 0 0 2px var(--tl-mode-accent,var(--tl-accent))}
+    .tl-mode.active::after{content:"✓";position:absolute;top:12px;right:12px;width:18px;height:18px;border-radius:50%;background:var(--tl-mode-accent,var(--tl-accent));color:#fff;font-size:.62rem;font-weight:900;display:grid;place-items:center}
+    .tl-mode-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:var(--tl-mode-accent-soft,#f1f3f7);color:var(--tl-mode-accent,#374151);font-size:1.1rem;flex:none;transition:transform .18s ease}
+    .tl-mode.active .tl-mode-icon{transform:scale(1.06)}
     .tl-mode strong{display:block;font-size:.9rem;margin-bottom:4px}
     .tl-mode small{display:block;color:var(--tl-muted);font-size:.76rem;line-height:1.45}
-    .tl-workspace{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(270px,.7fr);gap:20px;align-items:start}
+    #textModeBtn{--tl-mode-accent:var(--tl-mode-text);--tl-mode-accent-soft:var(--tl-mode-text-soft)}
+    #urlModeBtn{--tl-mode-accent:var(--tl-mode-url);--tl-mode-accent-soft:var(--tl-mode-url-soft)}
+    #imageModeBtn{--tl-mode-accent:var(--tl-mode-image);--tl-mode-accent-soft:var(--tl-mode-image-soft)}
+    @keyframes tlFadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes tlPulseDot{0%,100%{box-shadow:0 0 0 4px var(--tl-accent-soft)}50%{box-shadow:0 0 0 7px var(--tl-accent-soft)}}
+    .tl-workspace{display:grid;grid-template-columns:1fr;gap:20px;align-items:start;animation:tlFadeUp .5s ease .1s both}
     .tl-panel{background:var(--tl-surface);border:1px solid rgba(226,230,237,.9);border-radius:var(--tl-radius);box-shadow:var(--tl-shadow);backdrop-filter:blur(14px)}
     .tl-main-panel{padding:28px}
     .tl-panel-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;margin-bottom:18px}
     .tl-panel-head h2{font-size:1.15rem;margin:0 0 5px;letter-spacing:-.02em}
     .tl-panel-head p{margin:0;color:var(--tl-muted);font-size:.82rem;line-height:1.5}
-    .tl-status{font-size:.7rem;font-weight:800;padding:7px 10px;border-radius:999px;background:#f1f3f7;white-space:nowrap}
-    #articleInput{width:100%;min-height:300px;resize:vertical;border:1px solid #dfe3ea;border-radius:18px;background:#fff;padding:18px 19px;color:var(--tl-ink);font:inherit;font-size:.94rem;line-height:1.7;outline:none;transition:.2s;box-shadow:inset 0 1px 2px rgba(0,0,0,.02)}
-    #articleInput:focus{border-color:#aeb6c4;box-shadow:0 0 0 4px rgba(17,24,39,.06)}
+    .tl-status{font-size:.7rem;font-weight:800;padding:7px 10px;border-radius:999px;background:var(--tl-accent-soft);color:var(--tl-text-accent);white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+    .tl-status::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tl-text-accent)}
+    #articleInput{width:100%;min-height:300px;resize:vertical;border:1.5px solid #dfe3ea;border-radius:18px;background:#fff;padding:18px 19px;color:var(--tl-ink);font:inherit;font-size:.94rem;line-height:1.7;outline:none;transition:border-color .18s ease,box-shadow .18s ease;box-shadow:inset 0 1px 2px rgba(0,0,0,.02)}
+    #articleInput:focus{border-color:var(--tl-accent);box-shadow:var(--tl-focus)}
     #articleInput::placeholder{color:#9aa1ad}
     .tl-input-meta{display:flex;justify-content:space-between;gap:12px;margin:10px 2px 16px;color:#8a919d;font-size:.72rem}
-    #checkBtn{min-height:52px;border-radius:15px;font-weight:800;letter-spacing:-.01em}
+    .tl-char-count{font-variant-numeric:tabular-nums}
+    #checkBtn{min-height:52px;border-radius:15px;font-weight:800;letter-spacing:-.01em;transition:transform .15s ease,box-shadow .15s ease,filter .15s ease}
+    #checkBtn:hover{transform:translateY(-1px);filter:brightness(1.04)}
+    #checkBtn:active{transform:translateY(0);filter:brightness(.98)}
+    #checkBtn:disabled{opacity:.65;cursor:progress;transform:none}
     .tl-divider{display:flex;align-items:center;gap:12px;margin:24px 0;color:#a0a6b1;font-size:.72rem;font-weight:800;letter-spacing:.08em}
     .tl-divider:before,.tl-divider:after{content:"";height:1px;background:var(--tl-line);flex:1}
     .tl-image-box{border:1.5px dashed #cfd4dd;border-radius:18px;background:#fafbfc;padding:20px;display:grid;grid-template-columns:auto 1fr auto;gap:15px;align-items:center}
     .tl-upload-icon{width:46px;height:46px;border-radius:14px;background:#fff;border:1px solid var(--tl-line);display:grid;place-items:center;font-size:1.2rem}
     .tl-image-box strong{display:block;font-size:.86rem;margin-bottom:4px}
     .tl-image-box p{margin:0;color:var(--tl-muted);font-size:.75rem;line-height:1.45}
-    .tl-upload-label{display:inline-flex;align-items:center;justify-content:center;padding:10px 13px;border-radius:11px;border:1px solid #dfe3ea;background:#fff;font-size:.74rem;font-weight:800;cursor:pointer;white-space:nowrap}
+    .tl-upload-label{display:inline-flex;align-items:center;justify-content:center;padding:10px 13px;border-radius:11px;border:1px solid #dfe3ea;background:#fff;font-size:.74rem;font-weight:800;cursor:pointer;white-space:nowrap;transition:border-color .15s ease,transform .15s ease}
+    .tl-upload-label:hover{border-color:var(--tl-mode-image);transform:translateY(-1px)}
     #imageInput{display:block;width:100%;margin-top:9px;font-size:.74rem;color:#7a818c}
+    .tl-image-filename{display:none;margin-top:10px;padding:9px 12px;border-radius:10px;background:var(--tl-mode-image-soft);color:var(--tl-mode-image);font-size:.74rem;font-weight:700}
+    .tl-image-filename.show{display:block}
     #checkImageBtn{margin-top:12px!important;min-height:48px;border-radius:14px}
-    .tl-side{display:grid;gap:16px}
-    .tl-side-card{padding:22px}
-    .tl-side-card h3{font-size:.95rem;margin:0 0 14px;letter-spacing:-.015em}
+    .tl-tips-section{margin-top:0}
+    .tl-tips-grid{display:grid;grid-template-columns:1fr;gap:16px}
+    .tl-side{display:grid;gap:16px;align-content:start}
+    .tl-side-card{padding:22px;transition:box-shadow .18s ease,border-color .18s ease}
+    .tl-side-card:hover{box-shadow:0 16px 40px rgba(31,41,55,.08)}
+    @media(min-width:1000px){
+      .tl-workspace{grid-template-columns:minmax(0,1fr) 320px}
+      .tl-side{position:sticky;top:20px}
+    }
+    .tl-side-card h3,.tl-side-card summary{font-size:.95rem;margin:0 0 14px;letter-spacing:-.015em}
+    .tl-side-card summary{
+      cursor:pointer;list-style:none;margin-bottom:0;
+      display:flex;align-items:center;gap:8px;
+      transition:margin .15s ease;
+    }
+    .tl-side-card summary::-webkit-details-marker{display:none}
+    .tl-side-card summary::before{
+      content:"▸";font-size:.68rem;color:#8a919d;flex:none;
+      transition:transform .15s ease;
+    }
+    .tl-side-card[open] summary{margin-bottom:14px}
+    .tl-side-card[open] summary::before{transform:rotate(90deg)}
     .tl-step{display:flex;gap:11px;margin:13px 0}
     .tl-step:last-child{margin-bottom:0}
     .tl-step-num{width:26px;height:26px;border-radius:9px;background:#f0f2f5;display:grid;place-items:center;font-size:.7rem;font-weight:900;flex:none}
@@ -65,7 +111,7 @@
     .tl-result-title strong{font-size:.9rem}
     .tl-result-title span{font-size:.7rem;color:#7b828e;font-weight:700}
     .tl-disclaimer{margin-top:20px;padding:14px 16px;border:1px solid #eadfbd;border-radius:14px;background:#fffaf0;color:#715d24;font-size:.75rem;line-height:1.55}
-    @media(max-width:850px){.tl-workspace{grid-template-columns:1fr}.tl-detector-hero{align-items:flex-start;flex-direction:column}.tl-hero-badge{white-space:normal}.tl-mode-grid{grid-template-columns:1fr}}
+    @media(max-width:850px){.tl-workspace{grid-template-columns:1fr}.tl-detector-hero{align-items:flex-start;flex-direction:column}.tl-hero-badge{white-space:normal}.tl-mode-grid{grid-template-columns:1fr}.tl-tips-grid{grid-template-columns:1fr}}
     @media(max-width:560px){.tl-detector-wrap{padding:35px 14px 50px}.tl-main-panel{padding:18px}.tl-side-card{padding:18px}.tl-image-box{grid-template-columns:auto 1fr}.tl-upload-label{grid-column:1/-1;width:100%}.tl-detector-hero h1{font-size:2rem}#articleInput{min-height:240px}}
     .tl-mode{
       appearance:none;
@@ -77,12 +123,13 @@
       cursor:pointer;
     }
     .tl-mode:focus-visible{
-      outline:3px solid rgba(37,99,235,.25);
-      outline-offset:2px;
+      outline:none;
+      box-shadow:var(--tl-focus);
     }
     .tl-mode:not(.active):hover{
-      border-color:#b9c2d0;
-      transform:translateY(-1px);
+      border-color:var(--tl-mode-accent,#b9c2d0);
+      transform:translateY(-2px);
+      box-shadow:0 10px 24px rgba(31,41,55,.07);
     }
     .tl-mode-panel.hidden{display:none!important}
 
@@ -94,7 +141,8 @@
     .tl-result-card p{margin:5px 0;color:var(--tl-muted);font-size:.78rem;line-height:1.5}
     .tl-score-row{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:.8rem;font-weight:800}
     .tl-score-track{height:8px;border-radius:999px;background:#e9edf3;overflow:hidden;margin-top:8px}
-    .tl-score-fill{height:100%;width:0;border-radius:999px;transition:width .25s ease}
+    .tl-score-fill{height:100%;width:0;border-radius:999px;transition:width .6s cubic-bezier(.22,1,.36,1);background:linear-gradient(90deg,var(--tl-accent),#60a5fa)}
+    #riskScoreBar{background:linear-gradient(90deg,#f59e0b,#ef4444)}
     .evidence-item{padding:12px 0;border-bottom:1px solid var(--tl-line)}
     .evidence-item:last-child{border-bottom:0}
     .evidence-item strong{font-size:.8rem}
@@ -116,15 +164,21 @@
       width:38px;height:38px;border-radius:12px;
       display:grid;place-items:center;
       cursor:pointer;font-size:1rem;
-      transition:transform .2s ease,background .2s ease,border-color .2s ease;
+      transition:transform .25s ease,background .2s ease,border-color .2s ease;
     }
-    .tl-theme-toggle:hover{transform:translateY(-1px);background:#f5f6f8}
+    .tl-theme-toggle:hover{transform:translateY(-1px) rotate(-8deg);background:#f5f6f8}
+    .tl-theme-toggle:focus-visible{outline:none;box-shadow:var(--tl-focus)}
+    .tl-theme-toggle:active{transform:scale(.92)}
     .tl-result-wrap{
       margin-top:22px;
       border:1px solid var(--tl-line);
       background:linear-gradient(180deg,#fff 0%,#fafbfe 100%);
       padding:20px;
     }
+    #textModePanel:not(.hidden),
+    #imageModePanel:not(.hidden){animation:tlFadeUp .35s ease both}
+    .tl-verdict-shell:not(.hidden),
+    #resultBox:not(.hidden){animation:tlFadeUp .4s ease both}
     .tl-result-title{
       padding-bottom:14px;
       border-bottom:1px solid var(--tl-line);
@@ -135,7 +189,7 @@
       padding:24px;
       border:1px solid var(--tl-line);
       border-radius:18px;
-      background:#fff;
+      background:radial-gradient(120% 140% at 50% -20%,var(--tl-accent-soft) 0%,#fff 55%);
       text-align:center;
       box-shadow:0 12px 35px rgba(31,41,55,.07);
     }
@@ -151,12 +205,16 @@
       margin-top:9px;color:var(--tl-muted);font-size:.8rem;
     }
     .tl-metric-grid{
-      display:grid;grid-template-columns:1fr 1fr;gap:14px;
+      display:grid;grid-template-columns:1fr;gap:12px;
     }
     .tl-metric-card{
-      padding:17px;border:1px solid var(--tl-line);
-      border-radius:16px;background:#fff;
+      padding:16px 18px;border:1px solid var(--tl-line);
+      border-left:4px solid #c7cedb;
+      border-radius:14px;background:#fff;
+      transition:box-shadow .18s ease,transform .18s ease;
     }
+    .tl-metric-card:hover{box-shadow:0 10px 26px rgba(31,41,55,.07);transform:translateY(-1px)}
+    .tl-metric-card.tl-metric-risk{border-left-color:#e2a39c}
     .tl-metric-head{
       display:flex;justify-content:space-between;gap:10px;
       align-items:center;font-size:.78rem;font-weight:800;
@@ -166,6 +224,31 @@
       display:inline-flex;align-items:center;gap:6px;
       margin-top:9px;padding:6px 9px;border-radius:999px;
       background:#f4f5f7;color:#596170;font-size:.68rem;font-weight:900;
+    }
+    .tl-breakdown{
+      border:1px solid var(--tl-line);
+      border-radius:16px;
+      background:#fafbfc;
+      padding:0 16px;
+    }
+    .tl-breakdown[open]{padding-bottom:16px}
+    .tl-breakdown summary{
+      cursor:pointer;list-style:none;
+      padding:14px 2px;
+      font-size:.82rem;font-weight:800;color:var(--tl-ink);
+      display:flex;align-items:center;gap:8px;
+      border-radius:10px;transition:color .15s ease;
+    }
+    .tl-breakdown summary:hover{color:var(--tl-text-accent)}
+    .tl-breakdown summary:focus-visible{outline:none;box-shadow:var(--tl-focus)}
+    .tl-breakdown summary::-webkit-details-marker{display:none}
+    .tl-breakdown summary::before{
+      content:"▸";font-size:.7rem;color:#8a919d;
+      transition:transform .15s ease;
+    }
+    .tl-breakdown[open] summary::before{transform:rotate(90deg)}
+    .tl-breakdown-inner{
+      display:grid;gap:14px;padding-top:6px;
     }
     .tl-section-label{
       display:flex;align-items:center;gap:8px;
@@ -199,15 +282,25 @@
     }
     .tl-word-list{display:flex;flex-wrap:wrap;gap:6px}
     .tl-word-list .contributing-word{margin:0}
+    .tl-evidence-link{color:var(--tl-text-accent);border-bottom:1px solid transparent;transition:border-color .15s ease}
+    .tl-evidence-link:hover{border-bottom-color:var(--tl-text-accent)}
     .tl-image-box{transition:border-color .2s ease,background .2s ease}
-    .tl-image-box:hover{border-color:#aeb6c4;background:#f7f8fa}
+    .tl-image-box:hover{border-color:var(--tl-mode-image);background:#f7f8fa}
     #loading{
       padding:12px 14px;border-radius:12px;
-      background:#f1f3f7;color:#374151;
+      background:var(--tl-accent-soft);color:var(--tl-text-accent);
+      display:flex;align-items:center;gap:9px;
     }
+    #loading::before{
+      content:"";width:14px;height:14px;border-radius:50%;flex:none;
+      border:2px solid rgba(67,56,202,.25);border-top-color:var(--tl-text-accent);
+      animation:tlSpin .7s linear infinite;
+    }
+    @keyframes tlSpin{to{transform:rotate(360deg)}}
     #errorMessage{
       padding:11px 13px;border-radius:12px;
       background:#fff1f0;border:1px solid #f3c5c1;
+      display:flex;align-items:center;gap:8px;
     }
 
     /* Dark mode */
@@ -255,6 +348,9 @@
       background:#111827;border-color:#263244;
     }
     html[data-theme="dark"] .tl-score-track{background:#263244}
+    html[data-theme="dark"] .tl-metric-card{border-left-color:#334255}
+    html[data-theme="dark"] .tl-metric-card.tl-metric-risk{border-left-color:#7f3b35}
+    html[data-theme="dark"] .tl-breakdown{background:#111827;border-color:#263244}
     html[data-theme="dark"] .tl-disclaimer{
       background:#211d12;border-color:#4b4024;color:#d8c98c;
     }
@@ -263,7 +359,24 @@
     }
     html[data-theme="dark"] .tl-section-label::before{background:#f3f4f6}
     html[data-theme="dark"] .tl-live-badge{background:#1f2937;color:#d1d5db}
-    html[data-theme="dark"] .tl-kicker span{background:#f3f4f6}
+    html[data-theme="dark"] .tl-kicker span{background:#f3f4f6;box-shadow:0 0 0 4px rgba(147,197,253,.12)}
+    html[data-theme="dark"]{
+      --tl-accent:#6d8bf5;
+      --tl-accent-soft:#182235;
+      --tl-text-accent:#93c5fd;
+      --tl-mode-text-soft:#122333;
+      --tl-mode-url-soft:#20182f;
+      --tl-mode-image-soft:#0f2a20;
+    }
+    html[data-theme="dark"] .tl-detector-hero h1{background:linear-gradient(100deg,#f3f4f6 55%,#93c5fd 120%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    html[data-theme="dark"] .tl-status{background:#182235;color:#93c5fd}
+    html[data-theme="dark"] .tl-status::before{background:#93c5fd}
+    html[data-theme="dark"] .tl-verdict-shell{background:radial-gradient(120% 140% at 50% -20%,#182235 0%,#111827 55%)}
+    html[data-theme="dark"] #loading{background:#182235;color:#93c5fd}
+    html[data-theme="dark"] #loading::before{border-color:rgba(147,197,253,.25);border-top-color:#93c5fd}
+    html[data-theme="dark"] .tl-image-filename{background:#0f2a20;color:#6ee7b7}
+    html[data-theme="dark"] #articleInput::placeholder{color:#687386}
+    html[data-theme="dark"] .tl-evidence-link,html[data-theme="dark"] .tl-breakdown summary:hover{color:#93c5fd}
 
     @media(max-width:650px){
       .tl-metric-grid{grid-template-columns:1fr}
@@ -300,17 +413,17 @@
     </section>
 
     <section class="tl-mode-grid" aria-label="Verification options">
-      <button type="button" class="tl-mode active" id="textModeBtn" data-mode="text">
+      <button type="button" class="tl-mode active" id="textModeBtn" data-mode="text" aria-pressed="true">
         <div class="tl-mode-icon">✍️</div>
         <div><strong>Text verification</strong><small>Paste a headline or full article for analysis.</small></div>
       </button>
 
-      <button type="button" class="tl-mode" id="urlModeBtn" data-mode="url">
+      <button type="button" class="tl-mode" id="urlModeBtn" data-mode="url" aria-pressed="false">
         <div class="tl-mode-icon">🔗</div>
         <div><strong>URL verification</strong><small>Paste a news article link and inspect it.</small></div>
       </button>
 
-      <button type="button" class="tl-mode" id="imageModeBtn" data-mode="image">
+      <button type="button" class="tl-mode" id="imageModeBtn" data-mode="image" aria-pressed="false">
         <div class="tl-mode-icon">📷</div>
         <div><strong>Image verification</strong><small>Upload a screenshot containing article text.</small></div>
       </button>
@@ -331,7 +444,7 @@
             <textarea id="articleInput" placeholder="Paste a news headline or full article..." rows="10"></textarea>
             <div class="tl-input-meta">
               <span id="inputTip">Tip: more context can give the classifier more text to work with.</span>
-              <span>Secure input</span>
+              <span class="tl-char-count" id="articleCharCount">0 characters</span>
             </div>
 
             <button id="checkBtn" class="btn-primary btn-full">🔍 Analyze Text</button>
@@ -347,6 +460,7 @@
               <label for="imageInput" class="tl-upload-label">Choose image</label>
             </div>
             <input type="file" id="imageInput" accept="image/*">
+            <div class="tl-image-filename" id="imageFilename"></div>
             <div class="tl-input-meta">
               <span>Tip: a tight crop of just the article gives the OCR cleaner text to work with.</span>
               <span>Secure input</span>
@@ -373,7 +487,7 @@
                 <div id="confidenceValue" style="margin-top:7px;color:#8a919d;font-size:.68rem;"></div>
               </div>
 
-              <div class="tl-metric-card">
+              <div class="tl-metric-card tl-metric-risk">
                 <div class="tl-metric-head">
                   <span>Misinformation risk</span>
                   <strong id="riskScore">0/100</strong>
@@ -385,77 +499,85 @@
               </div>
             </div>
 
+            <button type="button" id="downloadPdfBtn" class="btn-secondary btn-full" style="margin-top:14px;">📄 Download PDF report</button>
+
             <div class="tl-result-details">
-              <div id="extractedTextPreview" class="tl-result-card extracted-text-preview hidden"></div>
-
-              <div id="sourceInfo" class="tl-result-card hidden"></div>
-
               <div id="liveVerification" class="tl-result-card hidden"></div>
 
-              <div id="evidenceContainer" class="tl-result-card hidden">
-                <h3>Matching news coverage</h3>
-              </div>
-<div id="resultBox" class="result-box hidden tl-result-wrap"> 
+              <details class="tl-breakdown">
+                <summary>See full breakdown</summary>
+                <div class="tl-breakdown-inner">
 
-    <div class="tl-result-title"> 
-        <strong>Verification result</strong> 
-        <span>Model check</span> 
-    </div>
+                  <div id="extractedTextPreview" class="tl-result-card extracted-text-preview hidden"></div>
 
+                  <div id="sourceInfo" class="tl-result-card hidden"></div>
 
-    <!-- Why this result -->
-    <div class="tl-explanation-card">
-        <div class="tl-card-header">
-            <span class="tl-card-icon">🧠</span>
-            <div>
-                <h3>Why this result?</h3>
-                <p>How TruthLens reached this conclusion</p>
-            </div>
-        </div>
+                  <div id="evidenceContainer" class="tl-result-card hidden">
+                    <h3>Matching news coverage</h3>
+                  </div>
 
-        <div id="whyResult" class="tl-card-content">
-            <p>Analysis details will appear here after verification.</p>
-        </div>
-    </div>
+                  <div id="resultBox" class="result-box hidden tl-result-wrap">
 
+                    <div class="tl-result-title">
+                        <strong>Verification result</strong>
+                        <span>Model check</span>
+                    </div>
 
-    <!-- Potential red flags -->
-    <div class="tl-explanation-card tl-redflag-card">
-        <div class="tl-card-header">
-            <span class="tl-card-icon">🚩</span>
-            <div>
-                <h3>Potential red flags</h3>
-                <p>Signals that may deserve closer checking</p>
-            </div>
-        </div>
+                    <!-- Why this result -->
+                    <div class="tl-explanation-card">
+                        <div class="tl-card-header">
+                            <span class="tl-card-icon">🧠</span>
+                            <div>
+                                <h3>Why this result?</h3>
+                                <p>How TruthLens reached this conclusion</p>
+                            </div>
+                        </div>
 
-        <div id="redFlags" class="tl-card-content">
-            <p>No red flags detected yet.</p>
-        </div>
-    </div>
+                        <div id="whyResult" class="tl-card-content">
+                            <p>Analysis details will appear here after verification.</p>
+                        </div>
+                    </div>
 
+                    <!-- Potential red flags -->
+                    <div class="tl-explanation-card tl-redflag-card">
+                        <div class="tl-card-header">
+                            <span class="tl-card-icon">🚩</span>
+                            <div>
+                                <h3>Potential red flags</h3>
+                                <p>Signals that may deserve closer checking</p>
+                            </div>
+                        </div>
 
-    <!-- What should I check? -->
-    <div class="tl-explanation-card">
-        <div class="tl-card-header">
-            <span class="tl-card-icon">💡</span>
-            <div>
-                <h3>What should I check?</h3>
-                <p>Quick steps to verify the information yourself</p>
-            </div>
-        </div>
+                        <div id="redFlags" class="tl-card-content">
+                            <p>No red flags detected yet.</p>
+                        </div>
+                    </div>
 
-        <div id="checkTips" class="tl-card-content">
-            <ul>
-                <li>Check whether reliable news sources report the same claim.</li>
-                <li>Look at the original source and publication date.</li>
-                <li>Be careful with sensational headlines and unsupported claims.</li>
-            </ul>
-        </div>
-    </div>
+                    <!-- What should I check? -->
+                    <div class="tl-explanation-card">
+                        <div class="tl-card-header">
+                            <span class="tl-card-icon">💡</span>
+                            <div>
+                                <h3>What should I check?</h3>
+                                <p>Quick steps to verify the information yourself</p>
+                            </div>
+                        </div>
 
-</div>
-              <div id="contributingWords" class="tl-result-card hidden"></div>
+                        <div id="checkTips" class="tl-card-content">
+                            <ul>
+                                <li>Check whether reliable news sources report the same claim.</li>
+                                <li>Look at the original source and publication date.</li>
+                                <li>Be careful with sensational headlines and unsupported claims.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                  </div>
+
+                  <div id="contributingWords" class="tl-result-card hidden"></div>
+
+                </div>
+              </details>
             </div>
           </div>
 
@@ -468,23 +590,23 @@
         </div>
       </div>
 
-      <aside class="tl-side">
-        <div class="tl-panel tl-side-card">
-          <h3>How to use it</h3>
+      <aside class="tl-tips-section tl-side tl-tips-grid" aria-label="Guidance">
+        <details class="tl-panel tl-side-card" open>
+          <summary>How to use it</summary>
           <div class="tl-step"><div class="tl-step-num">1</div><div><strong>Add content</strong>Paste text, a supported link, or choose a screenshot.</div></div>
           <div class="tl-step"><div class="tl-step-num">2</div><div><strong>Run analysis</strong>Let the existing TruthLens model process your input.</div></div>
           <div class="tl-step"><div class="tl-step-num">3</div><div><strong>Read the result</strong>Review the verdict, the model confidence, and the reasons behind the score.</div></div>
-        </div>
+        </details>
 
-        <div class="tl-panel tl-side-card">
-          <h3>For better results</h3>
+        <details class="tl-panel tl-side-card">
+          <summary>For better results</summary>
           <div class="tl-tip">Include the headline plus as much relevant article text as you have. For screenshots, use a sharp image where the text is clearly visible.</div>
-        </div>
+        </details>
 
-        <div class="tl-panel tl-side-card">
-          <h3>Stay in control</h3>
+        <details class="tl-panel tl-side-card">
+          <summary>Stay in control</summary>
           <div class="tl-tip">The verdict combines two separate checks: what the model learned from its training data, and whether current news coverage backs the story up. Every adjustment to the score is listed in the result.</div>
-        </div>
+        </details>
       </aside>
     </section>
   </main>
@@ -542,6 +664,44 @@
       window.truthLensVerificationMode = () => currentMode;
 
       setMode("text");
+
+      // --- UI-only enhancements below: no effect on verification logic ---
+
+      // Reflect active mode for assistive tech.
+      modeButtons.forEach((button) => {
+        button.setAttribute("aria-pressed", button.classList.contains("active") ? "true" : "false");
+      });
+      modeButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          modeButtons.forEach((b) => b.setAttribute("aria-pressed", b.dataset.mode === button.dataset.mode ? "true" : "false"));
+        });
+      });
+
+      // Live character counter for the text panel.
+      const charCount = document.getElementById("articleCharCount");
+      if (articleInput && charCount) {
+        const updateCount = () => {
+          const n = articleInput.value.length;
+          charCount.textContent = n === 1 ? "1 character" : n.toLocaleString() + " characters";
+        };
+        articleInput.addEventListener("input", updateCount);
+        updateCount();
+      }
+
+      // Show the chosen filename under the image uploader.
+      const imageInputEl = document.getElementById("imageInput");
+      const imageFilename = document.getElementById("imageFilename");
+      if (imageInputEl && imageFilename) {
+        imageInputEl.addEventListener("change", () => {
+          const file = imageInputEl.files && imageInputEl.files[0];
+          if (file) {
+            imageFilename.textContent = "📎 " + file.name;
+            imageFilename.classList.add("show");
+          } else {
+            imageFilename.classList.remove("show");
+          }
+        });
+      }
     });
   </script>
 
@@ -578,6 +738,105 @@
   <script type="module" src="js/firebase-config.js"></script>
   <script type="module" src="js/auth.js"></script>
   <script type="module" src="js/detector.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    // TruthLens PDF export — reads whatever is currently on screen,
+    // no server round-trip. Safe to run even if detector.js hasn't
+    // populated a result yet (shows an alert instead of an empty PDF).
+    (() => {
+      const btn = document.getElementById("downloadPdfBtn");
+      if (!btn) return;
+
+      function textOf(id) {
+        const el = document.getElementById(id);
+        return el ? el.innerText.trim() : "";
+      }
+
+      btn.addEventListener("click", () => {
+        const verdict = textOf("resultLabel");
+
+        if (!verdict) {
+          alert("Run an analysis first, then download the report.");
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+        const marginLeft = 48;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const maxWidth = pageWidth - marginLeft * 2;
+        let y = 56;
+
+        function ensureSpace(needed) {
+          if (y + needed > pageHeight - 40) {
+            doc.addPage();
+            y = 56;
+          }
+        }
+
+        function addHeading(text, size) {
+          ensureSpace(size * 2);
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(size);
+          doc.text(text, marginLeft, y);
+          y += size * 1.4;
+        }
+
+        function addParagraph(text, size) {
+          if (!text) return;
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(size);
+          const lines = doc.splitTextToSize(text, maxWidth);
+          ensureSpace(lines.length * (size * 1.35));
+          doc.text(lines, marginLeft, y);
+          y += lines.length * (size * 1.35) + 10;
+        }
+
+        addHeading("TruthLens Verification Report", 18);
+        addParagraph("Generated " + new Date().toLocaleString(), 9);
+        y += 6;
+
+        addHeading("Verdict: " + verdict, 14);
+        addParagraph("Model confidence: " + (textOf("confidence") || "—"), 10);
+        addParagraph(
+          "Misinformation risk: " + (textOf("riskScore") || "—") +
+          " (" + (textOf("riskLevel") || "—") + ")",
+          10
+        );
+
+        const evidence = textOf("liveVerification");
+        if (evidence) {
+          addHeading("Evidence check", 12);
+          addParagraph(evidence, 10);
+        }
+
+        const why = textOf("whyResult");
+        if (why) {
+          addHeading("Why this result?", 12);
+          addParagraph(why, 10);
+        }
+
+        const redFlags = textOf("redFlags");
+        if (redFlags) {
+          addHeading("Potential red flags", 12);
+          addParagraph(redFlags, 10);
+        }
+
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(8);
+        doc.text(
+          "TruthLens combines a machine-learning prediction with a live news check. This report is a guide, not proof.",
+          marginLeft,
+          pageHeight - 30
+        );
+
+        doc.save("truthlens-report.pdf");
+      });
+    })();
+  </script>
 
 </body>
 </html>

@@ -4,6 +4,7 @@ from flask_cors import CORS
 import os
 import re
 import io
+import json
 import socket
 import ipaddress
 import xml.etree.ElementTree as ET
@@ -201,8 +202,6 @@ KNOWN_NEWS_DOMAINS = {
     "economictimes.indiatimes.com",
     "timesofindia.indiatimes.com",
 }
-
-
 # ============================================================
 # BASIC HELPERS
 # ============================================================
@@ -225,14 +224,15 @@ def clean_text(text):
 
     return text
 
-
 OCR_NOISE_LINE_KEYWORDS = re.compile(
     r"(subscribe now|sign ?in|log ?in|newsletter|marketplace|"
     r"advertise|obituaries|enewspaper|legals|cookie policy|"
-    r"privacy policy|terms of service|q ?search)",
+    r"privacy policy|terms of service|q ?search|"
+    r"picture credit|photo credit|image credit|"
+    r"\b(save|comments?|share|sprint|follow|like|"
+    r"bookmark|print)\b)",
     re.IGNORECASE
 )
-
 
 def strip_ocr_chrome_noise(text):
     """
@@ -313,13 +313,119 @@ def get_domain(url):
         return ""
 
 
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+GROQ_MODEL = "llama-3.3-70b-versatile"
+GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions"
+
+# Domain -> result dict, kept for the life of the process so the same
+# unfamiliar domain isn't re-sent to the LLM on every request.
+_domain_reputation_cache = {}
+
+
+def check_domain_with_llm(domain):
+    """
+    For a domain NOT on the fixed KNOWN_NEWS_DOMAINS list, ask an LLM
+    (via Groq) whether it looks like a reputable news source, a
+    questionable one, or unknown. Cached per domain per process.
+
+    Returns None (rather than raising) on any failure, so a missing key
+    or a network hiccup just skips this check instead of breaking
+    /predict.
+    """
+    if not domain:
+        return None
+
+    if domain in _domain_reputation_cache:
+        return _domain_reputation_cache[domain]
+
+    if not GROQ_API_KEY:
+        return None
+
+    prompt = (
+        "Domain: {}\n\n"
+        "Based on what you know about this website, classify it as "
+        "exactly one of: reputable_news, questionable, or unknown. "
+        "Reply with ONLY a JSON object and nothing else, in this exact "
+        'shape: {{"verdict": "reputable_news", "reason": "one short '
+        'sentence"}}'
+    ).format(domain)
+
+    result = None
+
+    try:
+        response = requests.post(
+            GROQ_ENDPOINT,
+            headers={
+                "Authorization": "Bearer " + GROQ_API_KEY,
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": GROQ_MODEL,
+                "messages": [
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0,
+                "max_tokens": 120
+            },
+            timeout=8
+        )
+
+        response.raise_for_status()
+
+        content = response.json()["choices"][0]["message"]["content"]
+        content = content.strip()
+
+        # In case the model wraps the JSON in a markdown code fence anyway.
+        content = re.sub(
+            r"^```(?:json)?|```$",
+            "",
+            content,
+            flags=re.MULTILINE
+        ).strip()
+
+        parsed = json.loads(content)
+
+        verdict = parsed.get("verdict", "unknown")
+
+        if verdict not in ("reputable_news", "questionable", "unknown"):
+            verdict = "unknown"
+
+        result = {
+            "verdict": verdict,
+            "reason": str(parsed.get("reason", ""))[:200]
+        }
+
+    except Exception as e:
+        print("LLM domain check error:", repr(e))
+        result = None
+
+    _domain_reputation_cache[domain] = result
+    return result
+
+
 def get_domain_info(url):
     domain = get_domain(url)
+    is_known = domain in KNOWN_NEWS_DOMAINS
 
-    return {
+    info = {
         "domain": domain,
-        "is_known_outlet": domain in KNOWN_NEWS_DOMAINS
+        "is_known_outlet": is_known,
+        "llm_checked": False,
+        "llm_verdict": None,
+        "llm_reason": None
     }
+
+    # Only spend an LLM call on domains the fixed list doesn't cover.
+    if domain and not is_known:
+
+        llm_result = check_domain_with_llm(domain)
+
+        if llm_result:
+            info["llm_checked"] = True
+            info["llm_verdict"] = llm_result["verdict"]
+            info["llm_reason"] = llm_result["reason"]
+
+    return info
 
 
 # ============================================================
@@ -1069,6 +1175,11 @@ EVIDENCE_ADJUSTMENT = {
 
 KNOWN_OUTLET_ADJUSTMENT = -15
 
+# Applied only for domains NOT on the fixed list, based on the LLM's
+# reputation check instead.
+LLM_REPUTABLE_ADJUSTMENT = -10
+LLM_QUESTIONABLE_ADJUSTMENT = 12
+
 FAKE_THRESHOLD = 70
 REAL_THRESHOLD = 40
 
@@ -1207,6 +1318,45 @@ def apply_verification_layer(
                 format_signed(KNOWN_OUTLET_ADJUSTMENT)
             )
         )
+
+    elif source_info and source_info.get("llm_checked"):
+
+        llm_verdict = source_info.get("llm_verdict")
+
+        if llm_verdict == "reputable_news":
+
+            risk += LLM_REPUTABLE_ADJUSTMENT
+
+            reasons.append(
+                "{} isn't on the fixed outlet list, but an AI "
+                "reputation check flagged it as likely reputable "
+                "({}).".format(
+                    domain,
+                    format_signed(LLM_REPUTABLE_ADJUSTMENT)
+                )
+            )
+
+        elif llm_verdict == "questionable":
+
+            risk += LLM_QUESTIONABLE_ADJUSTMENT
+
+            reasons.append(
+                "{} isn't on the fixed outlet list, and an AI "
+                "reputation check flagged it as questionable "
+                "({}).".format(
+                    domain,
+                    format_signed(LLM_QUESTIONABLE_ADJUSTMENT)
+                )
+            )
+
+        else:
+
+            reasons.append(
+                "{} isn't on the fixed outlet list; the AI "
+                "reputation check was inconclusive (no change).".format(
+                    domain
+                )
+            )
 
     elif domain:
 
@@ -1732,7 +1882,7 @@ def predict_image():
 def serve_frontend_index():
     """
     Serve the frontend through Flask so browser scripts load over
-    http://127.0.0.1:5000 instead of file:///.
+     instead of file:///.
     """
     index_path = os.path.join(FRONTEND_DIR, "Index.html")
 
@@ -1794,7 +1944,6 @@ def serve_frontend_file(filename):
 # ============================================================
 
 if __name__ == "__main__":
-
     print("=" * 60)
     print("TruthLens backend starting...")
     print("=" * 60)
@@ -1816,7 +1965,7 @@ if __name__ == "__main__":
 
     print(
         "Server:",
-        "http://127.0.0.1:5000"
+        ""
     )
 
     print("=" * 60)

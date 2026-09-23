@@ -1,18 +1,23 @@
-# Environment variables / secrets
-.env
-backend/.env
-
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+.venv/
 venv/
+env/
 
-# Node (if ever added)
-node_modules/
+# Secrets
+.env
+.env.*
+!.env.example
 
-# OS junk
+# IDE / OS
+.vscode/
+.idea/
 .DS_Store
-Thumbs.db
 
-# Large dataset files (optional - remove these lines if you DO want the dataset in Git)
-dataset/*.csv
+# Logs
+*.log
+
+# Local data / training artifacts
+*.csv
